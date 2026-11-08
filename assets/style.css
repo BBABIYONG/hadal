@@ -100,7 +100,7 @@ body.is-home .top::after{display:none}
 body.is-home .nav a.on{background:transparent;border-color:transparent;color:#fff;text-decoration:underline;text-underline-offset:6px;text-decoration-color:var(--blue-l)}
 body.is-home main{display:flex;flex-direction:column;flex:1 1 auto;min-height:0}
 .still{position:relative;flex:1 1 auto;min-height:0;overflow:hidden}
-.still .sea{position:absolute;inset:0;width:100%;height:100%;display:block;filter:blur(1.6px)}
+.still .sea{position:absolute;left:0;right:0;bottom:0;width:100%;display:block}
 /* 홀로 있는 신호 하나 */
 .lone{position:absolute;left:68%;top:80%;width:0;height:0;z-index:2}
 .lone b{position:absolute;left:-3px;top:-3px;width:6px;height:6px;border-radius:50%;background:#C9D4FF;box-shadow:0 0 12px 3px rgba(120,150,255,.55);animation:breath 6s ease-in-out infinite}

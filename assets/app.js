@@ -27,6 +27,10 @@
       return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
     });
   }
+  function safeUrl(u) {
+    u = String(u == null ? "" : u).trim();
+    return /^https?:\/\//i.test(u) ? u : "#";
+  }
   function byId(list, id) { for (var i = 0; i < (list || []).length; i++) if (list[i].id === id) return list[i]; return null; }
   function sorted(list) { return (list || []).slice().sort(function (a, b) { return String(b.date || "").localeCompare(String(a.date || "")); }); }
   function dot(d) { return String(d || "").replace(/-/g, "."); }
@@ -72,7 +76,7 @@
           '<a class="still-go" href="#/works">건져 올린 것들</a>' +
         "</div>" +
       "</section>";
-    seas.push(makeSea(document.getElementById("heroSea"), { v0: innerWidth < 720 ? 0.7 : 0.68, cell: innerWidth < 720 ? 1.6 : 1, amp: 0.42, speed: 0.55 }));
+    seas.push(makeSea(document.getElementById("heroSea"), { v0: innerWidth < 720 ? 0.7 : 0.68, cell: innerWidth < 720 ? 1.6 : 1, amp: 0.42, speed: 0.55, band: true, scale: 0.5 }));
   }
 
   /* ---------- 건져 올린 것들 ---------- */
@@ -184,7 +188,7 @@
         '<span class="code">' + esc(w.code || "") + " / ( " + st[0] + " )" + (w.adult ? " / 19" : "") + "</span>" +
         "<h1>" + esc(w.title) + "</h1>" +
         (w.tagline ? '<p class="sub">' + esc(w.tagline) + "</p>" : "") +
-        '<div class="acts">' + (w.link ? '<a class="cmd play" href="' + esc(w.link) + '" target="_blank" rel="noopener">' + esc(w.platform || "크랙") + "에서 교신하기</a>" : '<span class="cmd line" style="opacity:.5">조율 중</span>') + "</div>" +
+        '<div class="acts">' + (w.link ? '<a class="cmd play" href="' + esc(safeUrl(w.link)) + '" target="_blank" rel="noopener">' + esc(w.platform || "크랙") + "에서 교신하기</a>" : '<span class="cmd line" style="opacity:.5">조율 중</span>') + "</div>" +
       "</div>" +
       '<dl class="side">' +
         "<div><dt>호출부호</dt><dd>" + esc(w.code || "—") + "</dd></div>" +
@@ -255,7 +259,7 @@
             (c.role ? '<p class="role">' + esc(c.role) + "</p>" : "") +
             '<div class="ticks" aria-hidden="true"></div>' +
             '<div class="acts">' +
-              (w.link ? '<a class="cmd play" href="' + esc(w.link) + '" target="_blank" rel="noopener">교신하기</a>' : "") +
+              (w.link ? '<a class="cmd play" href="' + esc(safeUrl(w.link)) + '" target="_blank" rel="noopener">교신하기</a>' : "") +
               '<a class="cmd line" href="#/works" data-dir="back">목록으로</a>' +
             "</div>" +
             '<div class="tabs" role="tablist" id="tabs">' + tabs.map(function (t, k) {
@@ -415,7 +419,7 @@
           (list.length > 1 ? '<button class="retune" type="button" id="retune">다른 순간 수신하기</button>' : "") +
           '<div class="prose about">' + md(m.about) + "</div>" +
           ((m.contact || []).length ? '<nav class="contact" aria-label="닿는 곳">' + m.contact.map(function (c) {
-            return '<a href="' + esc(c.url) + '" target="_blank" rel="noopener"><span>' + esc(c.label) + "</span><i>↗</i></a>";
+            return '<a href="' + esc(safeUrl(c.url)) + '" target="_blank" rel="noopener"><span>' + esc(c.label) + "</span><i>↗</i></a>";
           }).join("") + "</nav>" : "") +
           ((m.rules || []).length ? '<details class="rules-box"><summary>약속 <span>' + pad(m.rules.length) + '</span></summary><ol class="rules">' + m.rules.map(function (r, n) {
             return "<li><em>" + pad(n + 1) + "</em><span>" + inline(r) + "</span></li>";
@@ -452,12 +456,13 @@
      화면 픽셀마다 직접 계산하므로 늘려서 생기는 계단·깨짐이 없다.
      ========================================================= */
   var seas = [];
+  /* 가벼운 판: 색 번짐 없이 한 번만 계산하고, 화면 아래쪽만 낮은 해상도로 그린다
+     (어차피 흐릿하게 보이므로 해상도를 낮춰도 티가 나지 않는다) */
   var FRAG = [
-    "precision highp float;",
-    "uniform vec2 uRes; uniform float uT, uV0, uCell, uAmp;",
+    "precision mediump float;",
+    "uniform vec2 uRes; uniform float uT, uV0, uCell, uAmp, uTop, uAsp;",
     "vec2 h2(vec2 p){ vec3 q=fract(vec3(p.xyx)*vec3(.1031,.1030,.0973)); q+=dot(q,q.yzx+33.33); return fract((q.xx+q.yz)*q.zy); }",
     "float sm(float a,float b,float x){ x=clamp((x-a)/(b-a),0.,1.); return x*x*(3.-2.*x); }",
-    /* 한 겹의 물빛: 일렁이는 칸의 경계까지 거리 */
     "float edge(vec2 g, float t){",
     "  vec2 c=floor(g); float f1=9., f2=9.;",
     "  for(int j=-1;j<=1;j++) for(int i=-1;i<=1;i++){",
@@ -468,39 +473,25 @@
     "  }",
     "  return f2-f1;",
     "}",
-    /* 물결에 따라 바닥 좌표가 휘청인다 */
     "vec2 warp(vec2 p, float t){",
     "  p+=.22*vec2(sin(p.y*1.7+t*.9), cos(p.x*1.5-t*.8));",
-    "  p+=.10*vec2(sin(p.y*3.9-t*1.3), cos(p.x*4.3+t*1.1));",
-    "  return p;",
-    "}",
-    "float light(vec2 p, float t, float px){",
-    "  float e1=edge(warp(p,t)+vec2(t*.05,t*.03), t);",
-    "  float e2=edge(warp(p*1.37+vec2(4.1,7.3),-t*1.1)-vec2(t*.04,-t*.05), t*1.2);",
-    "  float w=.07+px*1.5;",
-    "  float l1=exp(-e1/w), l2=exp(-e2/(w*1.15));",
-    "  float g1=exp(-e1*5.), g2=exp(-e2*5.);",
-    "  return .5*l1+.4*l2+.8*l1*l2+.14*(g1+g2);",
+    "  return p+.10*vec2(sin(p.y*3.9-t*1.3), cos(p.x*4.3+t*1.1));",
     "}",
     "void main(){",
-    "  vec2 fc=gl_FragCoord.xy; float u=fc.x/uRes.x; float v=1.-fc.y/uRes.y;",
+    "  vec2 fc=gl_FragCoord.xy; float u=fc.x/uRes.x;",
+    "  float v=uTop+(1.-fc.y/uRes.y)*(1.-uTop);",
     "  if(v<uV0){ gl_FragColor=vec4(0.); return; }",
-    "  float K=9.5/uCell;",
-    "  float inv=1./(.46+.66*v);",
-    "  float gy=(uRes.y/uRes.x)*K*(.14+1.34*pow(v,2.2));",
-    "  float gx=(u-.5)*K*inv;",
-    "  vec2 p=vec2(gx,gy); float t=uT;",
-    "  float px=K*inv/uRes.x*1.5;",
-    /* 아주 옅은 색 번짐 — 빨강은 조금 안쪽, 파랑은 조금 바깥 */
-    "  vec2 o=vec2(.012,.008);",
-    "  float r=light(p-o,t,px), gch=light(p,t,px), b=light(p+o,t,px);",
-    "  vec3 col=vec3(r*.62,gch*.86,b*1.0);",
-    "  float env=sm(uV0,min(.99,uV0+.2),v)*uAmp;",
-    "  float cf=sm(0.,.14,u)*sm(0.,.14,1.-u);",
-    "  col*=env*cf;",
-    "  col=col/(1.+col*.6);",
-    "  float a=clamp(max(col.r,max(col.g,col.b)),0.,1.);",
-    "  gl_FragColor=vec4(col,a);",
+    "  float K=9.5/uCell, inv=1./(.46+.66*v);",
+    "  vec2 p=vec2((u-.5)*K*inv, uAsp*K*(.14+1.34*pow(v,2.2)));",
+    "  float t=uT;",
+    "  float e1=edge(warp(p,t)+vec2(t*.05,t*.03), t);",
+    "  float e2=edge(warp(p*1.37+vec2(4.1,7.3),-t*1.1)-vec2(t*.04,-t*.05), t*1.2);",
+    "  float w=.085;",
+    "  float l1=exp(-e1/w), l2=exp(-e2/(w*1.15));",
+    "  float L=.5*l1+.4*l2+.8*l1*l2+.14*(exp(-e1*5.)+exp(-e2*5.));",
+    "  float env=sm(uV0,min(.99,uV0+.2),v)*uAmp*sm(0.,.14,u)*sm(0.,.14,1.-u);",
+    "  vec3 col=vec3(.62,.86,1.)*L*env; col=col/(1.+col*.6);",
+    "  gl_FragColor=vec4(col,clamp(max(col.b,col.g),0.,1.));",
     "}"
   ].join("\n");
   var VERT = "attribute vec2 p; void main(){ gl_Position=vec4(p,0.,1.); }";
@@ -518,24 +509,31 @@
     var buf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buf);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
     var loc = gl.getAttribLocation(pr, "p"); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
-    var U = {}; ["uRes", "uT", "uV0", "uCell", "uAmp"].forEach(function (k) { U[k] = gl.getUniformLocation(pr, k); });
+    var U = {}; ["uRes", "uT", "uV0", "uCell", "uAmp", "uTop", "uAsp"].forEach(function (k) { U[k] = gl.getUniformLocation(pr, k); });
     gl.uniform1f(U.uV0, opt.v0 || 0);
     gl.uniform1f(U.uCell, opt.cell || 1);
     gl.uniform1f(U.uAmp, opt.amp || 0.36);
 
     var raf = 0, last = 0, t = Math.random() * 40, alive = true, visible = true;
     function size() {
-      var r = cv.getBoundingClientRect(), dpr = Math.min(devicePixelRatio || 1, 1.5);
-      cv.width = Math.max(1, Math.round(r.width * dpr)); cv.height = Math.max(1, Math.round(r.height * dpr));
+      /* 캔버스는 물결이 시작하는 높이 조금 위부터 바닥까지만 차지한다 */
+      var top = Math.max(0, (opt.v0 || 0) - 0.02), vh = innerHeight, vw = innerWidth;
+      if (opt.band) { cv.style.top = (top * 100) + "%"; cv.style.height = ((1 - top) * 100) + "%"; }
+      var r = cv.getBoundingClientRect(), q = opt.scale || 0.5;
+      cv.width = Math.max(1, Math.round(r.width * q)); cv.height = Math.max(1, Math.round(r.height * q));
       gl.viewport(0, 0, cv.width, cv.height);
       gl.uniform2f(U.uRes, cv.width, cv.height);
+      gl.uniform1f(U.uTop, opt.band ? top : 0);
+      gl.uniform1f(U.uAsp, (opt.band ? r.height / (1 - top) : r.height) / Math.max(1, r.width));
     }
     function draw() { gl.uniform1f(U.uT, t); gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT); gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4); }
     function frame(now) {
       if (!alive) return;
-      var dt = last ? Math.min((now - last) / 1000, 0.06) : 0; last = now;
+      raf = requestAnimationFrame(frame);
+      if (last && now - last < 32) return;            /* 약 30fps */
+      var dt = last ? Math.min((now - last) / 1000, 0.1) : 0; last = now;
       t += dt * (opt.speed || 1);
-      draw(); raf = requestAnimationFrame(frame);
+      draw();
     }
     function start() { if (!raf && !STILL && alive && visible && !document.hidden) { last = 0; raf = requestAnimationFrame(frame); } }
     function stop() { if (raf) { cancelAnimationFrame(raf); raf = 0; } }
@@ -557,7 +555,7 @@
       var dpr = Math.min(devicePixelRatio || 1, 2);
       W = innerWidth; H = innerHeight; cv.width = W * dpr; cv.height = H * dpr; cv.style.width = W + "px"; cv.style.height = H + "px";
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      ds = []; var n = Math.round(Math.max(50, Math.min(170, W * H / 9500)));
+      ds = []; var n = Math.round(Math.max(35, Math.min(90, W * H / 16000)));
       for (var i = 0; i < n; i++) ds.push({ x: Math.random() * W, y: Math.random() * H, r: 0.6 + Math.random() * 1.4, v: 4 + Math.random() * 9, ph: Math.random() * 6.28, sw: 4 + Math.random() * 10, a: 0.12 + Math.random() * 0.28 });
     }
     function draw(dt) {
@@ -568,7 +566,7 @@
         ctx.fillStyle = "rgba(226,234,255," + (d.a * 1.6).toFixed(3) + ")"; ctx.fill();
       }
     }
-    function frame(tm) { var dt = last ? Math.min((tm - last) / 1000, .06) : 0; last = tm; draw(dt); raf = requestAnimationFrame(frame); }
+    function frame(tm) { raf = requestAnimationFrame(frame); if (last && tm - last < 32) return; var dt = last ? Math.min((tm - last) / 1000, .1) : 0; last = tm; draw(dt); }
     size(); if (STILL) draw(0); else raf = requestAnimationFrame(frame);
     var rt; addEventListener("resize", function () { clearTimeout(rt); rt = setTimeout(size, 160); });
     document.addEventListener("visibilitychange", function () {
@@ -647,7 +645,7 @@
     var s = D.site || {};
     document.getElementById("footLine").textContent = "© " + new Date().getFullYear() + " " + (s.maker || "테르마") + " — " + (s.footer || "");
     document.getElementById("footLinks").innerHTML = (s.links || []).map(function (l) {
-      return '<a href="' + esc(l.url) + '" target="_blank" rel="noopener">' + esc(l.label) + " ↗</a>";
+      return '<a href="' + esc(safeUrl(l.url)) + '" target="_blank" rel="noopener">' + esc(l.label) + " ↗</a>";
     }).join("");
     go();
   }).catch(function () {
