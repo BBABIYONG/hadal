@@ -617,6 +617,13 @@
     all.forEach(function (s) { if (s) document.hidden ? s.sleep() : s.wake(); });
   });
   addEventListener("hashchange", go);
+  /* 그림 위에서는 우클릭 메뉴와 끌기를 막는다 */
+  ["contextmenu", "dragstart"].forEach(function (ev) {
+    document.addEventListener(ev, function (e) {
+      var t = e.target;
+      if (t && t.closest && (t.tagName === "IMG" || t.closest(".screen, .feed, .pic, .art, .gal, .lb, .roster"))) e.preventDefault();
+    });
+  });
 
   fetch("data.json", { cache: "no-cache" }).then(function (r) { if (!r.ok) throw 0; return r.json(); }).then(function (d) {
     D = d; D.works = D.works || []; D.lore = D.lore || []; D.logs = D.logs || [];
