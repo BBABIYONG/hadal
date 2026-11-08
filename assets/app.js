@@ -80,8 +80,9 @@
   function entries() {
     var out = [];
     sorted(D.works).forEach(function (w) {
-      var cs = w.characters || [];
-      if (!cs.length) cs = [{ id: "_", name: w.title, en: "", role: w.tagline, img: w.thumb, profile: [], about: w.intro, tmi: [], gallery: [], _solo: true }];
+      if (w.public === false) return;                       /* 작품째 비공개 */
+      var cs = (w.characters || []).filter(function (c) { return c.public !== false; });
+      if (!(w.characters || []).length) cs = [{ id: "_", name: w.title, en: "", role: w.tagline, img: w.thumb, profile: [], about: w.intro, tmi: [], gallery: [], prompt: w.prompt, _solo: true }];
       cs.forEach(function (c) { out.push({ w: w, c: c }); });
     });
     return out;
@@ -228,6 +229,9 @@
       (w.tagline && !c._solo ? '<p class="prose" style="margin:14px 0 0">' + esc(w.tagline) + "</p>" : "") +
       (w.opening ? '<blockquote class="opening" style="margin-top:14px">' + md(w.opening) + "</blockquote>" : "")]);
     var slots = gal.slice(0, 4); while (slots.length < 4) slots.push(null);
+    if (c.prompt) tabs.push(["prompt", "PROMPT",
+      '<div class="prompt"><div class="prompt-bar"><span class="tiny">' + esc(c.promptLabel || "prompt") + '</span>' +
+      '<button type="button" class="copy" id="copyPrompt">복사</button></div><pre id="promptText">' + esc(c.prompt) + "</pre></div>"]);
     tabs.push(["gallery", "GALLERY " + pad(gal.length), '<div class="gal" id="gal">' + slots.map(function (g, k) {
       return g ? '<button type="button" data-i="' + k + '"><img src="' + esc(g.src) + '" alt="' + esc(g.cap || "") + '" loading="lazy">' + (g.secret ? '<span class="secret">미공개</span>' : "") + "</button>"
                : '<button type="button" class="blank" tabindex="-1" aria-hidden="true"></button>';
@@ -287,6 +291,13 @@
     setTimeout(function () { moveBar(tabEl.querySelector("button.on")); }, 60);
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { var b = tabEl.querySelector("button.on"); if (b) moveBar(b); });
 
+    var cp = document.getElementById("copyPrompt");
+    if (cp) cp.addEventListener("click", function () {
+      var text = document.getElementById("promptText").textContent;
+      function done(ok) { cp.textContent = ok ? "복사됨" : "복사 실패"; setTimeout(function () { cp.textContent = "복사"; }, 1600); }
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(function () { done(true); }, function () { done(false); });
+      else { var ta = document.createElement("textarea"); ta.value = text; document.body.appendChild(ta); ta.select(); try { done(document.execCommand("copy")); } catch (e) { done(false); } ta.remove(); }
+    });
     var g = document.getElementById("gal");
     g.addEventListener("click", function (e) {
       var b = e.target.closest("button[data-i]"); if (b) lightbox(gal, Number(b.getAttribute("data-i")));
@@ -426,8 +437,9 @@
   }
 
   function notYet(name) {
-    view.innerHTML = '<div class="frame notyet">( ' + esc(name) + ' )<br>이 채널은 다음 시안에서 열립니다.<br><br><a class="cmd line" href="#/works">건져 올린 것들로</a></div>';
+    view.innerHTML = '<div class="frame notyet">( ' + esc(name || "수신 불가") + ' )<br>아직 닿지 않았거나, 잠들어 있는 신호입니다.<br><br><a class="cmd line" href="#/works">건져 올린 것들로</a></div>';
   }
+
 
   /* =========================================================
      물결 — 원래 사이트의 윤슬(수면 굴절광)을 GPU 셰이더로 옮겼다.
