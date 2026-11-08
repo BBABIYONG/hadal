@@ -499,7 +499,7 @@ body.is-char .foot{display:none}
 .obs{flex:1 1 auto;min-height:0;display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:56px;padding-top:34px;padding-bottom:34px;align-items:stretch}
 .feed{position:relative;min-height:0;height:100%;max-height:calc(100vh - 140px);border:1px solid var(--line-2);background:#030716;overflow:hidden;animation:rise .8s cubic-bezier(.2,.7,.2,1) both}
 .screen{position:absolute;inset:0}
-.screen img{width:100%;height:100%;object-fit:cover;display:block}
+.screen img{width:100%;height:100%;object-fit:cover;object-position:50% 30%;display:block}
 .nofeed{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--mono);font-size:.74rem;letter-spacing:.3em;color:var(--ink-3);
   background:radial-gradient(rgba(110,140,255,.14) 1px,transparent 1.5px) 0 0/7px 7px}
 /* 화면 위 얇은 주사선과 가장자리 어둠 */

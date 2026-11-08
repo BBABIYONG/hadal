@@ -13,7 +13,11 @@
     "links": [
       {
         "label": "크랙",
-        "url": "https://crack.wrtn.ai/"
+        "url": "https://share.crack.wrtn.ai/lyzzc8"
+      },
+      {
+        "label": "X",
+        "url": "https://x.com/ternnq"
       }
     ],
     "tagline": "빛이 닿지 않는 곳에서, 홀로 이야기를 빚어 위로 올려 보냅니다."
@@ -176,31 +180,31 @@
     "contact": [
       {
         "label": "X (트위터)",
-        "url": "https://x.com/"
+        "url": "https://x.com/ternnq"
       },
       {
         "label": "크랙 프로필",
-        "url": "https://crack.wrtn.ai/"
+        "url": "https://share.crack.wrtn.ai/lyzzc8"
       }
     ],
     "moments": [
       {
-        "img": "",
+        "img": "images/moment-grow.webp",
         "doing": "무언가를 기르는 중",
         "note": "빛이 없어도 자라는 것이 있다."
       },
       {
-        "img": "",
+        "img": "images/moment-make.webp",
         "doing": "이야기를 빚는 중",
         "note": "건져 올린 조각에 형태를 입히고 있다."
       },
       {
-        "img": "",
+        "img": "images/moment-rift.webp",
         "doing": "틈 너머의 신호를 바라보는 중",
         "note": "바닥의 균열에서 새어 나오는 빛이 신호처럼 숨 쉰다."
       },
       {
-        "img": "",
+        "img": "images/moment-walk.webp",
         "doing": "하달 너머를 걷는 중",
         "note": "바닥의 틈 너머, 아직 아무도 닿지 않은 곳."
       }
