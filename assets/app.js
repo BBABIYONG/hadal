@@ -229,9 +229,13 @@
       (w.tagline && !c._solo ? '<p class="prose" style="margin:14px 0 0">' + esc(w.tagline) + "</p>" : "") +
       (w.opening ? '<blockquote class="opening" style="margin-top:14px">' + md(w.opening) + "</blockquote>" : "")]);
     var slots = gal.slice(0, 4); while (slots.length < 4) slots.push(null);
-    if (c.prompt) tabs.push(["prompt", "PROMPT",
-      '<div class="prompt"><div class="prompt-bar"><span class="tiny">' + esc(c.promptLabel || "prompt") + '</span>' +
-      '<button type="button" class="copy" id="copyPrompt">복사</button></div><pre id="promptText">' + esc(c.prompt) + "</pre></div>"]);
+    /* 프롬프트: 캐릭터 / 의상 두 칸 (칸마다 복사) */
+    var pr = c.prompts || (c.prompt ? { character: c.prompt } : null);
+    var boxes = pr ? [["캐릭터", "character", pr.character], ["의상", "outfit", pr.outfit]].filter(function (b) { return b[2]; }) : [];
+    if (boxes.length) tabs.push(["prompt", "PROMPT", boxes.map(function (b) {
+      return '<div class="prompt"><div class="prompt-bar"><span class="tiny">' + b[0] + " · " + b[1] + '</span>' +
+        '<button type="button" class="copy" data-copy="' + b[1] + '">복사</button></div><pre data-text="' + b[1] + '">' + esc(b[2]) + "</pre></div>";
+    }).join("")]);
     tabs.push(["gallery", "GALLERY " + pad(gal.length), '<div class="gal" id="gal">' + slots.map(function (g, k) {
       return g ? '<button type="button" data-i="' + k + '"><img src="' + esc(g.src) + '" alt="' + esc(g.cap || "") + '" loading="lazy">' + (g.secret ? '<span class="secret">미공개</span>' : "") + "</button>"
                : '<button type="button" class="blank" tabindex="-1" aria-hidden="true"></button>';
@@ -291,12 +295,13 @@
     setTimeout(function () { moveBar(tabEl.querySelector("button.on")); }, 60);
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { var b = tabEl.querySelector("button.on"); if (b) moveBar(b); });
 
-    var cp = document.getElementById("copyPrompt");
-    if (cp) cp.addEventListener("click", function () {
-      var text = document.getElementById("promptText").textContent;
-      function done(ok) { cp.textContent = ok ? "복사됨" : "복사 실패"; setTimeout(function () { cp.textContent = "복사"; }, 1600); }
-      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(function () { done(true); }, function () { done(false); });
-      else { var ta = document.createElement("textarea"); ta.value = text; document.body.appendChild(ta); ta.select(); try { done(document.execCommand("copy")); } catch (e) { done(false); } ta.remove(); }
+    view.querySelectorAll(".prompt .copy").forEach(function (cp) {
+      cp.addEventListener("click", function () {
+        var text = view.querySelector('pre[data-text="' + cp.getAttribute("data-copy") + '"]').textContent;
+        function done(ok) { cp.textContent = ok ? "복사됨" : "복사 실패"; setTimeout(function () { cp.textContent = "복사"; }, 1600); }
+        if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(function () { done(true); }, function () { done(false); });
+        else { var ta = document.createElement("textarea"); ta.value = text; document.body.appendChild(ta); ta.select(); try { done(document.execCommand("copy")); } catch (e) { done(false); } ta.remove(); }
+      });
     });
     var g = document.getElementById("gal");
     g.addEventListener("click", function (e) {

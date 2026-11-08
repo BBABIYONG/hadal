@@ -67,9 +67,11 @@
           ],
           "gallery": [],
           "en": "SAMPLE ONE",
-          "prompt": "여기에 캐릭터 프롬프트를 적습니다.\n줄바꿈도 그대로 보여요.\n\n'복사' 버튼을 누르면 이 칸 전체가 복사됩니다.",
-          "promptLabel": "character prompt",
-          "public": true
+          "public": true,
+          "prompts": {
+            "character": "캐릭터 외형 프롬프트를 여기에 적습니다.\n(성별·체형·머리·눈·얼굴 등)",
+            "outfit": "의상 프롬프트를 여기에 적습니다.\n(상의·하의·신발·액세서리 등)"
+          }
         },
         {
           "id": "b",
