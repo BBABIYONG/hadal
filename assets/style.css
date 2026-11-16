@@ -596,3 +596,7 @@ html,body{overflow-x:hidden}
 .spec h3::after{transform:scaleX(.35);transform-origin:left;transition:background .3s,transform .7s cubic-bezier(.2,.7,.2,1)}
 .spec:hover h3::after{transform:scaleX(1)}
 @media (hover:none){.specimens:hover .spec:not(:hover){opacity:1}.spec .pic .tune,.spec .pic .crn{display:none}}
+/* E — 고요함 : 나머지는 어둠 속으로 가라앉음 */
+.specimens .spec{transition:opacity .8s ease,filter .8s ease}
+.specimens:hover .spec:not(:hover){opacity:.35;filter:blur(1.5px)}
+@media (hover:none){.specimens:hover .spec:not(:hover){filter:none}}
