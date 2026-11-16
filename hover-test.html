@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex"><title>호버 시험 · 하달의 너머</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Gowun+Batang&family=IBM+Plex+Mono&family=IBM+Plex+Sans+KR&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#040A18;--paper-2:#0A1430;--ink:#E3E9FF;--ink-2:#9BA7CF;--ink-3:#5E6A92;--line:rgba(206,218,255,.62);--line-2:rgba(206,218,255,.14);--blue:#4865FF;--blue-l:#A3B4FF;--mono:"IBM Plex Mono",monospace}
+html,body{margin:0;background:var(--paper);color:var(--ink);font-family:"IBM Plex Sans KR",sans-serif;scrollbar-width:none}
+body::-webkit-scrollbar{display:none}
+.wrap{max-width:1180px;margin:0 auto;padding:48px 28px 120px}
+h1{font-family:"Gowun Batang",serif;font-weight:500;font-size:1.6rem;margin:0 0 6px}
+.note{color:var(--ink-3);font-size:.85rem;margin:0 0 40px}
+section{border-top:1px solid var(--line-2);padding:26px 0 40px}
+section h2{font-family:var(--mono);font-weight:400;font-size:.78rem;color:var(--blue-l);letter-spacing:.12em;margin:0 0 4px}
+section p.d{margin:0 0 20px;color:var(--ink-2);font-size:.86rem}
+.row{display:grid;grid-template-columns:repeat(3,minmax(0,250px));gap:28px}
+.spec{display:block;text-decoration:none;color:inherit;position:relative}
+.pic{position:relative;aspect-ratio:4/5;border:1px solid var(--line);background:var(--blue);overflow:hidden}
+.pic img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none;-webkit-user-drag:none}
+.pic img.base{filter:grayscale(1) contrast(1.15);mix-blend-mode:screen}
+.pic img.col{background:var(--paper-2);opacity:0}
+h3{margin:14px 0 0;font-family:"Gowun Batang",serif;font-weight:500;font-size:1.25rem;display:flex;align-items:baseline;gap:10px;transition:color .6s}
+h3::after{content:"";flex:1;height:1px;background:var(--line-2);transition:background .6s}
+.spec:hover h3{color:var(--blue-l)}.spec:hover h3::after{background:var(--blue)}
+
+/* A — 천천히 떠오름 : 흐릿한 색이 물속에서 서서히 선명해짐 */
+.A .spec{transition:transform 1.2s cubic-bezier(.2,.7,.2,1)}
+.A .spec:hover{transform:translateY(-6px)}
+.A img.col{filter:blur(8px) brightness(.6);transform:scale(1.04);transition:opacity 1.2s ease,filter 1.4s ease,transform 1.6s cubic-bezier(.2,.7,.2,1)}
+.A .spec:hover img.col{opacity:1;filter:none;transform:scale(1)}
+
+/* B — 수면의 일렁임 : 색이 돌아오며 그림이 물결처럼 잠깐 흔들림 */
+.B img.col{transition:opacity .9s ease}
+.B .spec:hover img.col{opacity:1;animation:wob 1.6s ease-out}
+@keyframes wob{0%{filter:url(#ripple)}70%{filter:url(#ripple)}100%{filter:none}}
+.B .pic::after{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(120% 60% at 50% 120%,rgba(163,180,255,.0),rgba(163,180,255,0));transition:background 1s}
+
+/* C — 위에서 내려오는 빛 : 수면의 빛줄기가 그림을 비추며 색이 드러남 */
+.C img.col{-webkit-mask-image:linear-gradient(180deg,#000 0%,#000 40%,transparent 60%);mask-image:linear-gradient(180deg,#000 0%,#000 40%,transparent 60%);-webkit-mask-size:100% 250%;mask-size:100% 250%;-webkit-mask-position:0 100%;mask-position:0 100%;opacity:1;transition:-webkit-mask-position 1.4s cubic-bezier(.3,.6,.2,1),mask-position 1.4s cubic-bezier(.3,.6,.2,1)}
+.C .spec:hover img.col{-webkit-mask-position:0 0;mask-position:0 0}
+.C .pic::after{content:"";position:absolute;inset:-20% 10% auto;height:70%;pointer-events:none;background:linear-gradient(180deg,rgba(200,215,255,.28),transparent);filter:blur(14px);opacity:0;transform:translateY(-40%);transition:opacity 1s,transform 1.6s cubic-bezier(.2,.7,.2,1)}
+.C .spec:hover .pic::after{opacity:1;transform:none}
+
+/* D — 신호가 잡힘 : 잠깐 지직거린 뒤 색이 또렷하게 고정됨 */
+.D .spec:hover img.col{animation:tune .7s steps(1) forwards}
+@keyframes tune{0%{opacity:.5;transform:translateX(3px)}15%{opacity:0}30%{opacity:.8;transform:translateX(-2px)}45%{opacity:.2}60%{opacity:1;transform:none}100%{opacity:1}}
+.D .pic::after{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(4,10,24,.35) 0 1px,transparent 1px 3px);opacity:0}
+.D .spec:hover .pic::after{animation:lines .7s forwards}
+@keyframes lines{0%,50%{opacity:1}100%{opacity:0}}
+
+/* E — 고요함 : 다른 카드가 어둠 속으로 가라앉고, 고른 카드만 조용히 색을 띰 */
+.E .row{transition:none}
+.E .spec{transition:opacity .8s ease,filter .8s ease}
+.E .row:hover .spec:not(:hover){opacity:.35;filter:blur(1.5px)}
+.E img.col{transition:opacity 1s ease}
+.E .spec:hover img.col{opacity:1}
+
+@media (max-width:760px){.row{grid-template-columns:1fr 1fr}.row .spec:nth-child(3){display:none}}
+</style></head><body>
+<svg width="0" height="0" style="position:absolute"><filter id="ripple"><feTurbulence type="fractalNoise" baseFrequency="0.012 0.04" numOctaves="2" seed="3"><animate attributeName="baseFrequency" dur="3s" values="0.012 0.04;0.016 0.05;0.012 0.04" repeatCount="indefinite"/></feTurbulence><feDisplacementMap in="SourceGraphic" scale="14"/></filter></svg>
+<div class="wrap">
+<h1>호버 효과 시험</h1>
+<p class="note">카드에 마우스를 올려 보세요. 마음에 드는 글자(A~E)를 알려 주시면 그걸로 바꿉니다. 섞는 것도 가능해요.</p>
+<div id="secs"></div>
+</div>
+<script src="hover-test.js"></script>
+</body></html>

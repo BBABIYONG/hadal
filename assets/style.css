@@ -573,32 +573,5 @@ html,body{overflow-x:hidden}
 .cmd.soon{opacity:.6;cursor:default}
 .cmd.soon::after{content:none}
 
-/* ── 건져 올린 것들 : 호버 — 깊은 곳에서 색이 떠오름 ── */
-.specimens .spec{transition:opacity .5s ease}
-.specimens:hover .spec:not(:hover){opacity:.42}
-.spec .pic img{transition:filter .5s,transform 1.1s cubic-bezier(.2,.7,.2,1)}
-.spec:hover .pic img{filter:grayscale(1) contrast(1.15);mix-blend-mode:screen}
-.spec .pic img.tint{position:absolute;inset:0;filter:none;mix-blend-mode:normal;clip-path:inset(100% 0 0 0);transition:clip-path .9s cubic-bezier(.6,.05,.2,1),transform 1.1s cubic-bezier(.2,.7,.2,1)}
-.spec:hover .pic img{transform:scale(1.045)}
-.spec:hover .pic img.tint{clip-path:inset(0 0 0 0)}
-.spec .pic .scan{position:absolute;left:0;right:0;top:100%;height:1px;z-index:3;background:var(--blue-l);box-shadow:0 0 12px 2px rgba(163,180,255,.7);opacity:0;pointer-events:none}
-.spec:hover .pic .scan{animation:scanUp .9s cubic-bezier(.6,.05,.2,1) forwards}
-@keyframes scanUp{0%{top:100%;opacity:1}85%{opacity:1}100%{top:0;opacity:0}}
-.spec .pic .crn{position:absolute;inset:8px;z-index:3;pointer-events:none;opacity:0;transform:scale(1.06);transition:opacity .4s,transform .6s cubic-bezier(.2,.7,.2,1);
-  background:
-    linear-gradient(var(--ink),var(--ink)) left top/14px 1px,linear-gradient(var(--ink),var(--ink)) left top/1px 14px,
-    linear-gradient(var(--ink),var(--ink)) right top/14px 1px,linear-gradient(var(--ink),var(--ink)) right top/1px 14px,
-    linear-gradient(var(--ink),var(--ink)) left bottom/14px 1px,linear-gradient(var(--ink),var(--ink)) left bottom/1px 14px,
-    linear-gradient(var(--ink),var(--ink)) right bottom/14px 1px,linear-gradient(var(--ink),var(--ink)) right bottom/1px 14px;
-  background-repeat:no-repeat}
-.spec:hover .pic .crn{opacity:1;transform:none}
-.spec .pic .tune{position:absolute;left:0;bottom:0;z-index:4;background:var(--paper);color:var(--blue-l);font-family:var(--mono);font-size:.64rem;letter-spacing:.18em;padding:6px 10px;border-top:1px solid var(--line);border-right:1px solid var(--line);transform:translateY(101%);transition:transform .45s cubic-bezier(.2,.7,.2,1) .25s}
-.spec:hover .pic .tune{transform:none}
-.spec h3::after{transform:scaleX(.35);transition:background .3s,transform .7s cubic-bezier(.2,.7,.2,1)}
-.spec:hover h3::after{transform:scaleX(1)}
-.spec h3{transition:color .3s}
-@media (hover:none){.specimens:hover .spec:not(:hover){opacity:1}.spec .pic .tune,.spec .pic .crn,.spec .pic .scan{display:none}}
-@media (prefers-reduced-motion:reduce){.spec .pic img.tint{transition:none}.spec:hover .pic .scan{animation:none}}
 .specimens .spec{animation-fill-mode:backwards}
-.spec .pic img.tint{background:var(--paper-2)}
 .spec .flag{z-index:5}
