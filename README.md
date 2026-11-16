@@ -27,7 +27,7 @@
     { "label": "세이프", "url": "", "soon": "송출 예정" }
   ],
   "thumb": "images/xxx.webp",
-  "tags": ["태그"],
+  "tags": ["로맨스", "현대"],  // 큰 장르만 (로맨스·일상·현대·판타지 등) — 목록 필터로 쓰임
   "date": "2026-11-14",
   "characters": [{
     "id": "makoto", "public": true,
