@@ -31,6 +31,15 @@
     u = String(u == null ? "" : u).trim();
     return /^https?:\/\//i.test(u) ? u : "#";
   }
+  /* 작품 링크: links 목록이 있으면 버전마다 버튼, 없으면 link 하나 */
+  function linkButtons(w, label) {
+    var ls = (w.links && w.links.length) ? w.links : (w.link ? [{ label: "", url: w.link }] : []);
+    return ls.map(function (l) {
+      var name = (label || "교신하기") + (l.label ? " · " + l.label : "");
+      return l.url ? '<a class="cmd play" href="' + esc(safeUrl(l.url)) + '" target="_blank" rel="noopener">' + esc(name) + "</a>"
+                   : '<span class="cmd line soon">' + esc((l.label ? l.label + " · " : "") + (l.soon || "송출 예정")) + "</span>";
+    }).join("");
+  }
   function byId(list, id) { for (var i = 0; i < (list || []).length; i++) if (list[i].id === id) return list[i]; return null; }
   function sorted(list) { return (list || []).slice().sort(function (a, b) { return String(b.date || "").localeCompare(String(a.date || "")); }); }
   function dot(d) { return String(d || "").replace(/-/g, "."); }
@@ -112,7 +121,7 @@
       '<div class="meta"><span>' + esc(w.code || "") + '</span><span class="st ' + st[1] + '">( ' + st[0] + " )</span></div>" +
       '<div class="pic">' +
         (src ? '<img src="' + esc(src) + '" alt="" loading="lazy">' : '<div class="nosig"><span>NO SIGNAL</span><span>' + dot(w.date) + "</span></div>") +
-        (w.adult ? '<span class="flag">19</span>' : "") +
+        (w.badge ? '<span class="flag">' + esc(w.badge) + "</span>" : w.adult ? '<span class="flag">19</span>' : "") +
         (w.example ? '<span class="flag ex">예시</span>' : "") +
       "</div>" +
       "<h3>" + esc(c.name) + "</h3>" +
@@ -185,10 +194,10 @@
     view.innerHTML = '<div class="frame">' +
       '<a class="back" href="#/works">← 건져 올린 것들</a>' +
       '<header class="whead"><div>' +
-        '<span class="code">' + esc(w.code || "") + " / ( " + st[0] + " )" + (w.adult ? " / 19" : "") + "</span>" +
+        '<span class="code">' + esc(w.code || "") + " / ( " + st[0] + " )" + (w.badge ? " / " + esc(w.badge) : w.adult ? " / 19" : "") + "</span>" +
         "<h1>" + esc(w.title) + "</h1>" +
         (w.tagline ? '<p class="sub">' + esc(w.tagline) + "</p>" : "") +
-        '<div class="acts">' + (w.link ? '<a class="cmd play" href="' + esc(safeUrl(w.link)) + '" target="_blank" rel="noopener">' + esc(w.platform || "크랙") + "에서 교신하기</a>" : '<span class="cmd line" style="opacity:.5">조율 중</span>') + "</div>" +
+        '<div class="acts">' + (linkButtons(w, (w.platform || "크랙") + "에서 교신하기") || '<span class="cmd line" style="opacity:.5">조율 중</span>') + "</div>" +
       "</div>" +
       '<dl class="side">' +
         "<div><dt>호출부호</dt><dd>" + esc(w.code || "—") + "</dd></div>" +
@@ -227,7 +236,7 @@
       '<dl class="hud">' +
         "<div><dt>작품</dt><dd>" + esc(w.title) + "</dd></div>" +
         "<div><dt>호출부호</dt><dd>" + esc(w.code || "—") + "</dd></div>" +
-        "<div><dt>상태</dt><dd>" + st[0] + (w.adult ? " · 19" : "") + "</dd></div>" +
+        "<div><dt>상태</dt><dd>" + st[0] + (w.badge ? " · " + esc(w.badge) : w.adult ? " · 19" : "") + "</dd></div>" +
         ((w.tags || []).length ? "<div><dt>태그</dt><dd>" + w.tags.map(function (t) { return "#" + esc(t); }).join(" ") + "</dd></div>" : "") +
       "</dl>" +
       (w.tagline && !c._solo ? '<p class="prose" style="margin:14px 0 0">' + esc(w.tagline) + "</p>" : "") +
@@ -259,7 +268,7 @@
             (c.role ? '<p class="role">' + esc(c.role) + "</p>" : "") +
             '<div class="ticks" aria-hidden="true"></div>' +
             '<div class="acts">' +
-              (w.link ? '<a class="cmd play" href="' + esc(safeUrl(w.link)) + '" target="_blank" rel="noopener">교신하기</a>' : "") +
+              linkButtons(w) +
               '<a class="cmd line" href="#/works" data-dir="back">목록으로</a>' +
             "</div>" +
             '<div class="tabs" role="tablist" id="tabs">' + tabs.map(function (t, k) {
