@@ -35,13 +35,11 @@
       "links": [
         {
           "label": "19+",
-          "url": "",
-          "soon": "링크 준비 중"
+          "url": "https://share.crack.wrtn.ai/fozw1j8"
         },
         {
           "label": "세이프",
-          "url": "",
-          "soon": "오늘 12:00 송출 예정"
+          "url": "https://share.crack.wrtn.ai/7q389xv"
         }
       ],
       "thumb": "images/tsuji-makoto.webp",
@@ -168,13 +166,24 @@
           "tmi": [
             "마코토가 초등학교 3학년 때부터 당신만 좋아해 왔다는 걸 알고 있다.",
             "핑크는 보이지도 들리지도 않는다.",
-            "『사케도코로 츠지 子』에서는 공략할 수 없다."
+            "『사케도코로 츠지 子』에서는 공략할 수 없다. 텟페이의 이야기는 따로 송출될 예정."
           ],
           "gallery": [],
           "prompts": {
             "character": "",
             "outfit": ""
-          }
+          },
+          "links": [
+            {
+              "label": "19+",
+              "url": "",
+              "soon": "개인 챗 송출 예정"
+            },
+            {
+              "label": "세이프 · 子",
+              "url": "https://share.crack.wrtn.ai/7q389xv"
+            }
+          ]
         }
       ],
       "lore": [

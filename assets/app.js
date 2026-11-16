@@ -32,8 +32,8 @@
     return /^https?:\/\//i.test(u) ? u : "#";
   }
   /* 작품 링크: links 목록이 있으면 버전마다 버튼, 없으면 link 하나 */
-  function linkButtons(w, label) {
-    var ls = (w.links && w.links.length) ? w.links : (w.link ? [{ label: "", url: w.link }] : []);
+  function linkButtons(w, label, c) {
+    var ls = (c && c.links && c.links.length) ? c.links : (w.links && w.links.length) ? w.links : (w.link ? [{ label: "", url: w.link }] : []);
     return ls.map(function (l) {
       var name = (label || "교신하기") + (l.label ? " · " + l.label : "");
       return l.url ? '<a class="cmd play" href="' + esc(safeUrl(l.url)) + '" target="_blank" rel="noopener">' + esc(name) + "</a>"
@@ -268,7 +268,7 @@
             (c.role ? '<p class="role">' + esc(c.role) + "</p>" : "") +
             '<div class="ticks" aria-hidden="true"></div>' +
             '<div class="acts">' +
-              linkButtons(w) +
+              linkButtons(w, "", c) +
               '<a class="cmd line" href="#/works" data-dir="back">목록으로</a>' +
             "</div>" +
             '<div class="tabs" role="tablist" id="tabs">' + tabs.map(function (t, k) {
