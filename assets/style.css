@@ -575,3 +575,24 @@ html,body{overflow-x:hidden}
 
 .specimens .spec{animation-fill-mode:backwards}
 .spec .flag{z-index:5}
+
+/* ── 건져 올린 것들 : 호버 ── */
+.specimens .spec{transition:opacity .6s ease}
+.specimens:hover .spec:not(:hover){opacity:.42}
+.spec:hover .pic img{filter:grayscale(1) contrast(1.15);mix-blend-mode:screen}
+.spec .pic img.tint{position:absolute;inset:0;background:var(--paper-2);filter:none;mix-blend-mode:normal;opacity:0;transition:opacity 1s ease}
+.spec:hover .pic img.tint{opacity:1}
+.spec .pic .crn{position:absolute;inset:8px;z-index:3;pointer-events:none;opacity:0;transform:scale(1.06);transition:opacity .4s,transform .6s cubic-bezier(.2,.7,.2,1);
+  background:
+    linear-gradient(var(--ink),var(--ink)) left top/14px 1px,linear-gradient(var(--ink),var(--ink)) left top/1px 14px,
+    linear-gradient(var(--ink),var(--ink)) right top/14px 1px,linear-gradient(var(--ink),var(--ink)) right top/1px 14px,
+    linear-gradient(var(--ink),var(--ink)) left bottom/14px 1px,linear-gradient(var(--ink),var(--ink)) left bottom/1px 14px,
+    linear-gradient(var(--ink),var(--ink)) right bottom/14px 1px,linear-gradient(var(--ink),var(--ink)) right bottom/1px 14px;
+  background-repeat:no-repeat}
+.spec:hover .pic .crn{opacity:1;transform:none}
+.spec .pic .tune{position:absolute;left:0;bottom:0;z-index:4;background:var(--paper);color:var(--blue-l);font-family:var(--mono);font-size:.64rem;letter-spacing:.18em;padding:6px 10px;border-top:1px solid var(--line);border-right:1px solid var(--line);transform:translateY(101%);transition:transform .45s cubic-bezier(.2,.7,.2,1) .2s}
+.spec:hover .pic .tune{transform:none}
+.spec h3{transition:color .3s}
+.spec h3::after{transform:scaleX(.35);transform-origin:left;transition:background .3s,transform .7s cubic-bezier(.2,.7,.2,1)}
+.spec:hover h3::after{transform:scaleX(1)}
+@media (hover:none){.specimens:hover .spec:not(:hover){opacity:1}.spec .pic .tune,.spec .pic .crn{display:none}}

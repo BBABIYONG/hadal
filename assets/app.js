@@ -120,7 +120,10 @@
     return '<a class="spec" href="' + entryHash(e) + '">' +
       '<div class="meta"><span>' + esc(w.code || "") + '</span><span class="st ' + st[1] + '">( ' + st[0] + " )</span></div>" +
       '<div class="pic">' +
-        (src ? '<img src="' + esc(src) + '" alt="" loading="lazy">' : '<div class="nosig"><span>NO SIGNAL</span><span>' + dot(w.date) + "</span></div>") +
+        (src ? '<img src="' + esc(src) + '" alt="" loading="lazy">' +
+               '<img class="tint" src="' + esc(src) + '" alt="" loading="lazy" aria-hidden="true">' +
+               '<i class="crn" aria-hidden="true"></i><span class="tune" aria-hidden="true">TUNE IN →</span>'
+             : '<div class="nosig"><span>NO SIGNAL</span><span>' + dot(w.date) + "</span></div>") +
         (w.badge ? '<span class="flag">' + esc(w.badge) + "</span>" : w.adult ? '<span class="flag">19</span>' : "") +
         (w.example ? '<span class="flag ex">예시</span>' : "") +
       "</div>" +
