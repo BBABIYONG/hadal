@@ -45,7 +45,19 @@
   function dot(d) { return String(d || "").replace(/-/g, "."); }
   function pad(n) { return String(n).padStart(2, "0"); }
 
-  function paintNav(id) {
+  var CH_UP = [
+    { id: "surface", no: "00", hash: "#/surface",         name: "수신함" },
+    { id: "station", no: "01", hash: "#/surface/station", name: "송신소" }
+  ];
+  function paintNav(id, up) {
+    var logo = document.querySelector(".logo");
+    if (logo) logo.setAttribute("href", up ? "#/surface" : "#/");
+    if (up) {
+      navEl.innerHTML = '<span class="up-tag">( on land )</span>' + CH_UP.map(function (c) {
+        return '<a href="' + c.hash + '" class="' + (c.id === id ? "on" : "") + '"><em>' + c.no + "</em>" + esc(c.name) + "</a>";
+      }).join("");
+      return;
+    }
     navEl.innerHTML = CH.map(function (c) {
       return '<a href="' + c.hash + '" class="' + (c.id === id ? "on" : "") + '"><em>' + c.no + "</em>" + esc(c.name) + "</a>";
     }).join("");
@@ -86,33 +98,43 @@
         "</div>" +
       "</section>";
     seas.push(makeSea(document.getElementById("heroSea"), { v0: innerWidth < 720 ? 0.7 : 0.68, cell: innerWidth < 720 ? 1.6 : 1, amp: 0.42, speed: 0.55, band: true, scale: 0.5 }));
-    touchSea(view.querySelector(".still"), innerWidth < 720 ? 0.7 : 0.68);
+    touchSea(view.querySelector(".still"), function (y) { return y > (innerWidth < 720 ? 0.7 : 0.68); }, "up");
   }
 
   /* 물결을 다섯 번 건드리면 위에서 빛이 내려오고, 지상으로 올라간다.
      멈추면 몇 초 뒤 처음부터 다시 센다. */
-  function touchSea(box, v0) {
+  function touchSea(box, inWater, dir) {
     if (!box) return;
     var n = 0, timer = 0;
     box.addEventListener("pointerdown", function (e) {
       if (e.target.closest("a, button")) return;
       var r = box.getBoundingClientRect(), y = (e.clientY - r.top) / r.height;
-      if (y < v0) return;
+      if (!inWater(y, e.clientY - r.top)) return;
       var rp = document.createElement("i");
       rp.className = "ripple"; rp.style.left = (e.clientX - r.left) + "px"; rp.style.top = (e.clientY - r.top) + "px";
       box.appendChild(rp); setTimeout(function () { rp.remove(); }, 1600);
       n++; clearTimeout(timer);
       box.style.setProperty("--lift", Math.min(n, 4) / 4);
-      if (n >= 5) { n = 0; rise(); return; }
+      if (n >= 5) { n = 0; tide(dir); return; }
       timer = setTimeout(function () { n = 0; box.style.setProperty("--lift", 0); }, 3000);
     });
   }
-  function rise() {
-    var o = document.createElement("div"); o.className = "breach"; document.body.appendChild(o);
-    requestAnimationFrame(function () { o.classList.add("on"); });
-    setTimeout(function () { firstPaint = true; location.hash = "#/surface"; }, 1300);
-    setTimeout(function () { o.classList.add("off"); }, 1500);
-    setTimeout(function () { o.remove(); }, 2600);
+  /* 물을 건너는 전환: 올라갈 땐 흰 수면이 아래에서 차오르고, 내려갈 땐 짙은 바다가 위에서 덮친다.
+     덮인 사이에 화면을 바꾸고, 물이 걷히며 새 화면이 드러난다. */
+  var crossing = false;
+  function tide(dir) {
+    if (crossing) return; crossing = true;
+    var up = dir === "up", o = document.createElement("div");
+    o.className = "tide " + (up ? "to-up" : "to-down");
+    var bub = "";
+    for (var i = 0; i < 26; i++) bub += '<i style="left:' + (Math.random() * 100).toFixed(1) + "%;animation-delay:" + (Math.random() * .9).toFixed(2) + "s;--s:" + (0.5 + Math.random() * 1.6).toFixed(2) + '"></i>';
+    o.innerHTML = '<div class="tide-body"><svg class="tide-edge" viewBox="0 0 1200 60" preserveAspectRatio="none" aria-hidden="true"><path d="M0 30 Q75 0 150 30 T300 30 T450 30 T600 30 T750 30 T900 30 T1050 30 T1200 30 V60 H0Z"/><path class="b" d="M0 34 Q100 10 200 34 T400 34 T600 34 T800 34 T1000 34 T1200 34 V60 H0Z"/></svg><div class="tide-fill"></div></div><div class="tide-bub">' + bub + "</div>" +
+      '<p class="tide-say">' + (up ? "수면 위로" : "하달 아래로") + "</p>";
+    document.body.appendChild(o);
+    requestAnimationFrame(function () { requestAnimationFrame(function () { o.classList.add("in"); }); });
+    setTimeout(function () { firstPaint = true; location.hash = up ? "#/surface" : "#/"; }, 1250);
+    setTimeout(function () { o.classList.add("out"); }, 1650);
+    setTimeout(function () { o.remove(); crossing = false; }, 2900);
   }
 
   /* ---------- 지상 ---------- */
@@ -128,8 +150,12 @@
   function renderSurface() {
     var s = D.surface || {}, list = s.teasers || [];
     view.innerHTML =
+      '<div class="ticker" aria-hidden="true"><div>' + Array(6).join('<span>RECEIVING ··· SIGNAL FROM BELOW ··· 11,034 m → 0 m ··· STORIES IN TRANSIT ··· </span>') + "</div></div>" +
       '<section class="above">' +
         '<canvas class="sea" id="skySea" aria-hidden="true"></canvas>' +
+        '<p class="touch-hint" aria-hidden="true">( surface — 0 m )</p>' +
+        '<div class="ruler" aria-hidden="true">' + [0, 10, 20, 30, 40, 50, 60, 70, 80].map(function (v) { return "<span>+" + v + "</span>"; }).join("") + "</div>" +
+        stampSVG() +
         '<div class="frame above-in">' +
           '<span class="cross a"><i></i></span><span class="cross b"><i></i></span>' +
           orbitSVG().replace("11,034 m", "0 m — 수면").replace(">∞<", ">↑<").replace("[ 신호원 ]", "[ 수신점 ]") +
@@ -140,6 +166,9 @@
             "<div><dt>발신</dt><dd>하달 아래</dd></div><div><dt>수신</dt><dd>지상의 " + esc((D.site || {}).maker || "테르마") + "</dd></div>" +
             '<div><dt>상태</dt><dd>조율 중</dd></div></dl><footer><span class="barcode"></span><span class="tiny">HDL-' + pad(list.length) + "00</span></footer></aside>" +
           '<div class="vert">아직 닿지 않은 신호를, <b>먼저 받아 둡니다</b></div>' +
+          '<span class="coord a">37°33′N 126°58′E</span><span class="coord b">ALT +0 m · ' + new Date().getFullYear() + "</span>" +
+          '<span class="halftone" aria-hidden="true"></span>' +
+          sparkles(7) +
         "</div>" +
       "</section>" +
       '<section class="frame soon-list">' +
@@ -148,14 +177,27 @@
           return '<figure class="soon">' +
             '<div class="meta"><span>( ' + pad(k + 1) + " )</span><span>COMING SOON</span></div>" +
             '<div class="pic">' + (t.img ? '<img src="' + esc(t.img) + '" alt="">' : '<div class="ghost"><span>NO IMAGE</span></div>') +
-              '<span class="star4" aria-hidden="true"></span></div>' +
+              '<span class="star4" aria-hidden="true"></span><i class="bk tl"></i><i class="bk br"></i>' +
+              '<span class="code">SIG-' + pad(k + 1) + "</span></div>" +
             "<figcaption><b>" + esc(t.name || "???") + "</b>" + (t.en ? "<i>" + esc(t.en) + "</i>" : "") +
               '<span class="tg">' + (t.tags || []).map(function (g) { return "#" + esc(g); }).join(" ") + "</span></figcaption>" +
           "</figure>";
         }).join("") + "</div>" +
-        '<div class="dive"><a href="#/">하달로 내려가기</a></div>' +
+        '<div class="soon-foot"><span class="barcode"></span><span class="tiny">END OF TRANSMISSION</span></div>' +
       "</section>";
     seas.push(makeSea(document.getElementById("skySea"), { v0: 0.56, cell: innerWidth < 720 ? 1.6 : 1, amp: 0.42, speed: 0.45, band: true, flip: true, light: true, scale: 0.5 }));
+    touchSea(view.querySelector(".above"), function (y, py) { return py < view.querySelector(".above").offsetHeight * 0.4; }, "down");
+  }
+  function stampSVG() {
+    return '<svg class="stamp" viewBox="0 0 120 120" aria-hidden="true"><defs><path id="stc" d="M60 60 m-46 0 a46 46 0 1 1 92 0 a46 46 0 1 1 -92 0"/></defs>' +
+      '<circle cx="60" cy="60" r="56"/><circle cx="60" cy="60" r="34"/>' +
+      '<text><textPath href="#stc">RECEIVED ON LAND · SIGNAL FROM BELOW · HADAL ·</textPath></text>' +
+      '<path class="s" d="M60 44 Q62 58 76 60 Q62 62 60 76 Q58 62 44 60 Q58 58 60 44Z"/></svg>';
+  }
+  function sparkles(n) {
+    var o = "";
+    for (var i = 0; i < n; i++) o += '<i class="spk" style="left:' + (48 + Math.random() * 44).toFixed(1) + "%;top:" + (22 + Math.random() * 60).toFixed(1) + "%;--z:" + (0.5 + Math.random()).toFixed(2) + ";animation-delay:" + (Math.random() * 4).toFixed(2) + 's"></i>';
+    return o;
   }
 
   /* ---------- 건져 올린 것들 ---------- */
@@ -466,14 +508,15 @@
   }
 
   /* ---------- 송신소: 들어올 때마다 지금의 '나'를 하나 비춘다 ---------- */
-  function pickMoment(list, avoid) {
+  function pickMoment(list, avoid, key) {
+    key = key || "hadal-moment";
     if (!list.length) return -1;
     var last = -1;
-    try { last = Number(sessionStorage.getItem("hadal-moment")); } catch (e) {}
+    try { last = Number(sessionStorage.getItem(key)); } catch (e) {}
     if (avoid != null) last = avoid;
     var k = Math.floor(Math.random() * list.length);
     if (list.length > 1 && k === last) k = (k + 1 + Math.floor(Math.random() * (list.length - 1))) % list.length;
-    try { sessionStorage.setItem("hadal-moment", k); } catch (e) {}
+    try { sessionStorage.setItem(key, k); } catch (e) {}
     return k;
   }
   function clock() {
@@ -481,20 +524,22 @@
     return d.getFullYear() + "." + pad(d.getMonth() + 1) + "." + pad(d.getDate()) + "  " + pad(d.getHours()) + ":" + pad(d.getMinutes()) + ":" + pad(d.getSeconds());
   }
   var clockTimer = 0;
-  function renderMaker() {
-    var m = D.maker || {}, list = (m.moments || []).filter(function (x) { return x && (x.img || x.doing); });
-    var k = pickMoment(list);
+  function renderMaker(up) {
+    var base = D.maker || {}, st = up ? ((D.surface || {}).station || {}) : base;
+    var m = up ? { name: st.name || base.name, en: st.en || base.en, line: st.line, about: st.about, moments: st.moments, contact: base.contact, rules: base.rules } : base;
+    var list = (m.moments || []).filter(function (x) { return x && (x.img || x.doing); });
+    var k = pickMoment(list, null, up ? "hadal-moment-up" : "hadal-moment");
 
     view.innerHTML =
       '<section class="frame obs">' +
         '<div class="feed" id="feed">' +
           '<div class="screen" id="screen"></div>' +
-          '<div class="hud-top"><span class="rec"><b></b>LIVE</span><span>CAM-04 · 11,034 m</span></div>' +
+          '<div class="hud-top"><span class="rec"><b></b>LIVE</span><span>' + (up ? "CAM-00 · ALT +0 m" : "CAM-04 · 11,034 m") + "</span></div>" +
           '<div class="hud-bot"><span id="clock">' + clock() + "</span><span>" + (list.length ? pad(k + 1) + " / " + pad(list.length) : "--") + "</span></div>" +
           '<span class="corner a"></span><span class="corner b"></span><span class="corner c"></span><span class="corner d"></span>' +
         "</div>" +
         '<div class="op">' +
-          '<p class="tiny sq">operator</p>' +
+          '<p class="tiny sq">' + (up ? "operator · on land" : "operator") + "</p>" +
           "<h1>" + esc(m.name || "테르마") + (m.en ? "<small>" + esc(m.en) + "</small>" : "") + "</h1>" +
           (m.line ? '<p class="line">' + esc(m.line) + "</p>" : "") +
           '<div class="now" id="now"></div>' +
@@ -522,7 +567,7 @@
     }
     if (k >= 0) show(k);
     var rb = document.getElementById("retune");
-    if (rb) rb.addEventListener("click", function () { k = pickMoment(list, k); show(k); });
+    if (rb) rb.addEventListener("click", function () { k = pickMoment(list, k, up ? "hadal-moment-up" : "hadal-moment"); show(k); });
     clearInterval(clockTimer);
     clockTimer = setInterval(function () { var c = document.getElementById("clock"); if (c) c.textContent = clock(); else clearInterval(clockTimer); }, 1000);
   }
@@ -685,18 +730,20 @@
     seas.forEach(function (s) { if (s) s.kill(); }); seas = []; closeLb();
     document.body.classList.toggle("is-home", top === "home");
     document.body.classList.toggle("is-char", top === "works" && !!parts[2]);
-    document.body.classList.toggle("is-obs", top === "maker");
+    var upSt = top === "surface" && parts[1] === "station";
+    document.body.classList.toggle("is-obs", top === "maker" || upSt);
     setSurface(top === "surface");
-    paintNav(top);
+    paintNav(top === "surface" ? (upSt ? "station" : "surface") : top, top === "surface");
     if (top === "home") renderHome();
     else if (top === "works" && !parts[1]) renderWorks();
     else if (top === "works" && parts[2]) renderChar(parts[1], parts[2]);
     else if (top === "log") renderLog();
     else if (top === "lore") renderLore(parts[1]);
     else if (top === "maker") renderMaker();
+    else if (upSt) renderMaker(true);
     else if (top === "surface") renderSurface();
     else notYet("알 수 없는 채널");
-    document.title = top === "surface" ? "지상 · 하달의 너머" : (top === "home" ? "" : ((byId(CH, top) || {}).name || "") + " · ") + "하달의 너머";
+    document.title = top === "surface" ? (upSt ? "송신소 · 지상 · 하달의 너머" : "지상 · 하달의 너머") : (top === "home" ? "" : ((byId(CH, top) || {}).name || "") + " · ") + "하달의 너머";
     scrollTo(0, 0);
     view.classList.remove("out", "out-left", "out-right");
     view.classList.add("in");
