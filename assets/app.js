@@ -53,7 +53,7 @@
     var logo = document.querySelector(".logo");
     if (logo) logo.setAttribute("href", up ? "#/surface" : "#/");
     if (up) {
-      navEl.innerHTML = '<span class="up-tag">( on land )</span>' + CH_UP.map(function (c) {
+      navEl.innerHTML = CH_UP.map(function (c) {
         return '<a href="' + c.hash + '" class="' + (c.id === id ? "on" : "") + '"><em>' + c.no + "</em>" + esc(c.name) + "</a>";
       }).join("");
       return;
@@ -142,7 +142,11 @@
   function setSurface(on) {
     var ic = document.querySelector('link[rel="icon"]'), tc = document.querySelector('meta[name="theme-color"]');
     if (ICON_DEEP === null && ic) ICON_DEEP = ic.getAttribute("href");
-    if (ic) ic.setAttribute("href", on ? ICON_SURF : ICON_DEEP);
+    if (ic && ic.getAttribute("href") !== (on ? ICON_SURF : ICON_DEEP)) {
+      /* 일부 브라우저는 href만 바꾸면 아이콘을 다시 읽지 않아서, 태그를 새로 꽂는다 */
+      var nic = document.createElement("link"); nic.rel = "icon"; nic.href = on ? ICON_SURF : ICON_DEEP;
+      ic.parentNode.replaceChild(nic, ic);
+    }
     if (tc) tc.setAttribute("content", on ? "#F3F5FA" : "#040A18");
     document.body.classList.toggle("is-surface", on);
     SNOW.up = on; SNOW.rgb = on ? "39,65,230" : "226,234,255"; SNOW.k = on ? 1.5 : 1.6;
@@ -743,7 +747,7 @@
     else if (upSt) renderMaker(true);
     else if (top === "surface") renderSurface();
     else notYet("알 수 없는 채널");
-    document.title = top === "surface" ? (upSt ? "송신소 · 지상 · 하달의 너머" : "지상 · 하달의 너머") : (top === "home" ? "" : ((byId(CH, top) || {}).name || "") + " · ") + "하달의 너머";
+    document.title = top === "surface" ? (upSt ? "송신소 · 지상" : "지상") : (top === "home" ? "" : ((byId(CH, top) || {}).name || "") + " · ") + "하달의 너머";
     scrollTo(0, 0);
     view.classList.remove("out", "out-left", "out-right");
     view.classList.add("in");

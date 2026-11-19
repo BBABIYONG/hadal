@@ -773,3 +773,10 @@ body.is-surface .hud-top,body.is-surface .hud-bot{color:#fff;text-shadow:none}
 @media (prefers-reduced-motion:reduce){.tide-edge,.stamp,.spk,.ticker div{animation:none}}
 body.is-surface .prose,body.is-surface .prose p{color:var(--ink-2)}
 body.is-surface .prose strong,body.is-surface .prose b{color:var(--ink)}
+
+/* 지상: 물결을 건드리면 파란 고리가 퍼짐 */
+.above .ripple{position:absolute;z-index:3;width:0;height:0;pointer-events:none}
+.above .ripple::before,.above .ripple::after{content:"";position:absolute;left:-90px;top:-26px;width:180px;height:52px;border-radius:50%;border:2px solid var(--blue-d);background:radial-gradient(closest-side,rgba(39,65,230,.12),transparent);box-shadow:0 0 0 1px rgba(255,255,255,.8),0 0 16px rgba(39,65,230,.45);transform:scale(.1);opacity:1;animation:ripple 1.5s cubic-bezier(.2,.6,.3,1) forwards}
+.above .ripple::after{animation-delay:.2s;border-color:var(--blue);background:none}
+.above{--lift:0}
+.above .sea{filter:saturate(calc(1 + var(--lift) * .6)) contrast(calc(1 + var(--lift) * .25));transition:filter 1.2s ease}
