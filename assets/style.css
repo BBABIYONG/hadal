@@ -784,3 +784,16 @@ body.is-surface .prose strong,body.is-surface .prose b{color:var(--ink)}
 .tide.out .tide-say{animation:sayOut .45s ease forwards}
 @keyframes sayOut{from{opacity:1;letter-spacing:.5em}to{opacity:0;letter-spacing:.8em}}
 body.is-surface .screen img{object-position:50% 0%}
+
+/* 지상 첫 화면: 한 화면에 고정, 스크롤 없음 */
+body.is-surf-home{overflow:hidden;height:100vh;height:100dvh}
+body.is-surf-home main{display:flex;flex-direction:column;flex:1 1 auto;min-height:0}
+body.is-surf-home .above{flex:1 1 auto;min-height:0;border-bottom:0}
+body.is-surf-home .above-in{min-height:0;height:100%}
+/* 수신함 머리 */
+.soon-list{padding-top:54px}
+.soon-h{grid-template-columns:auto 1fr auto;align-items:end}
+.soon-h .big{font-family:var(--en-serif);font-size:clamp(4rem,9vw,7rem);line-height:.8;color:var(--blue)}
+.soon-h h2{font-size:clamp(2rem,4.4vw,3.4rem);line-height:1.05}
+.soon-h h2 i{display:block;font-family:var(--en-serif);font-style:italic;font-size:.46em;color:var(--blue);margin-top:6px}
+@media (max-width:720px){body.is-surf-home .above-in{padding-bottom:9vh}}

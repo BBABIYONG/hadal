@@ -46,8 +46,9 @@
   function pad(n) { return String(n).padStart(2, "0"); }
 
   var CH_UP = [
-    { id: "surface", no: "00", hash: "#/surface",         name: "수신함" },
-    { id: "station", no: "01", hash: "#/surface/station", name: "송신소" }
+    { id: "surface",  no: "00", hash: "#/surface",          name: "지상" },
+    { id: "incoming", no: "01", hash: "#/surface/incoming", name: "수신함" },
+    { id: "station",  no: "02", hash: "#/surface/station",  name: "송신소" }
   ];
   function paintNav(id, up) {
     var logo = document.querySelector(".logo");
@@ -175,8 +176,15 @@
           sparkles(7) +
         "</div>" +
       "</section>" +
+      "";
+    seas.push(makeSea(document.getElementById("skySea"), { v0: 0.56, cell: innerWidth < 720 ? 1.6 : 1, amp: 0.42, speed: 0.45, band: true, flip: true, light: true, scale: 0.5 }));
+    touchSea(view.querySelector(".above"), function (y, py) { return py < view.querySelector(".above").offsetHeight * 0.4; }, "down");
+  }
+  function renderIncoming() {
+    var s = D.surface || {}, list = s.teasers || [];
+    view.innerHTML =
       '<section class="frame soon-list">' +
-        '<div class="soon-h"><span class="tiny br">incoming</span><h2>곧 올라올 것들</h2><span class="tiny">' + pad(list.length) + " signals</span></div>" +
+        '<div class="soon-h"><span class="big">01</span><h2>곧 올라올 것들<i>incoming</i></h2><span class="tiny">' + pad(list.length) + " signals</span></div>" +
         '<div class="soons">' + list.map(function (t, k) {
           return '<figure class="soon">' +
             '<div class="meta"><span>( ' + pad(k + 1) + " )</span><span>COMING SOON</span></div>" +
@@ -189,8 +197,6 @@
         }).join("") + "</div>" +
         '<div class="soon-foot"><span class="barcode"></span><span class="tiny">END OF TRANSMISSION</span></div>' +
       "</section>";
-    seas.push(makeSea(document.getElementById("skySea"), { v0: 0.56, cell: innerWidth < 720 ? 1.6 : 1, amp: 0.42, speed: 0.45, band: true, flip: true, light: true, scale: 0.5 }));
-    touchSea(view.querySelector(".above"), function (y, py) { return py < view.querySelector(".above").offsetHeight * 0.4; }, "down");
   }
   function stampSVG() {
     return '<svg class="stamp" viewBox="0 0 120 120" aria-hidden="true"><defs><path id="stc" d="M60 60 m-46 0 a46 46 0 1 1 92 0 a46 46 0 1 1 -92 0"/></defs>' +
@@ -734,10 +740,11 @@
     seas.forEach(function (s) { if (s) s.kill(); }); seas = []; closeLb();
     document.body.classList.toggle("is-home", top === "home");
     document.body.classList.toggle("is-char", top === "works" && !!parts[2]);
-    var upSt = top === "surface" && parts[1] === "station";
+    var upSt = top === "surface" && parts[1] === "station", upIn = top === "surface" && parts[1] === "incoming";
+    document.body.classList.toggle("is-surf-home", top === "surface" && !parts[1]);
     document.body.classList.toggle("is-obs", top === "maker" || upSt);
     setSurface(top === "surface");
-    paintNav(top === "surface" ? (upSt ? "station" : "surface") : top, top === "surface");
+    paintNav(top === "surface" ? (upSt ? "station" : upIn ? "incoming" : "surface") : top, top === "surface");
     if (top === "home") renderHome();
     else if (top === "works" && !parts[1]) renderWorks();
     else if (top === "works" && parts[2]) renderChar(parts[1], parts[2]);
@@ -745,9 +752,10 @@
     else if (top === "lore") renderLore(parts[1]);
     else if (top === "maker") renderMaker();
     else if (upSt) renderMaker(true);
+    else if (upIn) renderIncoming();
     else if (top === "surface") renderSurface();
     else notYet("알 수 없는 채널");
-    document.title = top === "surface" ? (upSt ? "송신소 · 지상" : "지상") : (top === "home" ? "" : ((byId(CH, top) || {}).name || "") + " · ") + "하달의 너머";
+    document.title = top === "surface" ? (upSt ? "송신소 · 지상" : upIn ? "수신함 · 지상" : "지상") : (top === "home" ? "" : ((byId(CH, top) || {}).name || "") + " · ") + "하달의 너머";
     scrollTo(0, 0);
     view.classList.remove("out", "out-left", "out-right");
     view.classList.add("in");
