@@ -289,10 +289,10 @@
       }
     ],
     "station": {
-      "name": "테르마",
-      "en": "Terma",
+      "name": "■■■",
+      "en": "■■■■■",
       "line": "on land — 받은 이야기를 들고 걷는 중",
-      "about": "하달 아래의 내가 쏘아 올린 신호를, 지상의 내가 받아 듭니다.\n\n받은 이야기는 들고 다니며 지상 곳곳에 퍼뜨립니다.",
+      "about": "지상에 있습니다.",
       "moments": [
         {
           "img": "images/land-walk.webp",

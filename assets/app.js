@@ -167,7 +167,7 @@
           "<h1>" + esc(s.title || "지상의 나") + "</h1>" +
           '<p class="above-line">' + esc(s.line || "") + "</p>" +
           '<aside class="sheet" aria-label="수신 정보"><header><span>RECEIVED</span><span>No.' + pad(list.length) + "</span></header><dl>" +
-            "<div><dt>발신</dt><dd>하달 아래</dd></div><div><dt>수신</dt><dd>지상의 " + esc((D.site || {}).maker || "테르마") + "</dd></div>" +
+            "<div><dt>발신</dt><dd>하달 아래</dd></div><div><dt>수신</dt><dd>지상의 " + esc(((D.surface || {}).station || {}).name || "■■■") + "</dd></div>" +
             '<div><dt>상태</dt><dd>조율 중</dd></div></dl><footer><span class="barcode"></span><span class="tiny">HDL-' + pad(list.length) + "00</span></footer></aside>" +
           '<div class="vert">아직 닿지 않은 신호를, <b>먼저 받아 둡니다</b></div>' +
           '<span class="coord a">37°33′N 126°58′E</span><span class="coord b">ALT +0 m · ' + new Date().getFullYear() + "</span>" +
