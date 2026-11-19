@@ -531,8 +531,7 @@ body.is-char .foot{display:none}
 .now{margin-top:10px;padding:16px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line-2)}
 .now b{display:block;margin-top:6px;font-family:var(--kr-serif);font-weight:700;font-size:clamp(1.3rem,2.3vw,1.7rem);color:#fff}
 .now p{margin:6px 0 0;font-family:var(--kr-serif);font-size:.92rem;color:var(--ink-2)}
-.now.show b{animation:typeIn 1.2s steps(14) .3s both}
-.now.show p{animation:fadein 1s ease .9s both}
+.now.show p{animation:fadein 1s ease calc(.5s + var(--n,10) * 75ms) both}
 @keyframes typeIn{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
 .retune{align-self:flex-start;cursor:pointer;background:none;border:0;padding:0 0 3px;border-bottom:1px solid var(--line-2);font-family:var(--mono);font-size:.72rem;letter-spacing:.1em;color:var(--ink-2);transition:color .25s,border-color .25s}
 .retune::before{content:"↻  ";color:var(--blue-l)}
@@ -802,3 +801,13 @@ body.is-surf-home .above-in{min-height:0;height:100%}
 .stamp,.spk,.ticker div{will-change:transform}
 .stamp{contain:layout paint}
 .above .halftone{will-change:auto}
+
+/* 송신소 NOW: 한 글자씩 써짐 */
+.now b .ch{display:inline-block;opacity:0;white-space:pre}
+.now.show b .ch{animation:chIn .45s cubic-bezier(.2,.7,.2,1) forwards;animation-delay:calc(.35s + var(--i) * 75ms)}
+@keyframes chIn{from{opacity:0;transform:translateY(.28em);filter:blur(4px)}to{opacity:1;transform:none;filter:none}}
+.now b .caret{display:inline-block;width:2px;height:.95em;margin-left:4px;vertical-align:-.08em;background:var(--blue-l);opacity:0}
+.now.show b .caret{animation:caret 1s steps(1) infinite;animation-delay:calc(.35s + var(--n,10) * 75ms)}
+@keyframes caret{0%{opacity:1}50%{opacity:0}}
+body.is-surface .now b .caret{background:var(--blue)}
+@media (prefers-reduced-motion:reduce){.now b .ch{opacity:1}}

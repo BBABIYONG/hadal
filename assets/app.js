@@ -571,7 +571,12 @@
       feed.classList.remove("tuned"); void feed.offsetWidth; feed.classList.add("tuning");
       scr.innerHTML = mo.img ? '<img src="' + esc(mo.img) + '" alt="' + esc((m.name || "") + " — " + (mo.doing || "")) + '">'
                              : '<div class="nofeed"><span>NO SIGNAL</span></div>';
-      now.innerHTML = '<span class="tiny">NOW —</span><b>' + esc(mo.doing || "") + "</b>" + (mo.note ? "<p>" + esc(mo.note) + "</p>" : "");
+      /* 한 글자씩 써지게: 글자마다 나타나는 시점을 조금씩 늦춘다 */
+      var chars = Array.from(mo.doing || "");
+      now.innerHTML = '<span class="tiny">NOW —</span><b style="--n:' + chars.length + '">' + chars.map(function (ch, i) {
+        return '<span class="ch" style="--i:' + i + '">' + (ch === " " ? "&nbsp;" : esc(ch)) + "</span>";
+      }).join("") + '<i class="caret" aria-hidden="true"></i></b>' + (mo.note ? "<p>" + esc(mo.note) + "</p>" : "");
+      now.querySelector("b").setAttribute("aria-label", mo.doing || "");
       now.classList.remove("show"); void now.offsetWidth; now.classList.add("show");
       document.querySelector(".hud-bot span:last-child").textContent = pad(idx + 1) + " / " + pad(list.length);
       setTimeout(function () { feed.classList.remove("tuning"); feed.classList.add("tuned"); }, 900);
