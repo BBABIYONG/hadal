@@ -115,9 +115,9 @@
       rp.className = "ripple"; rp.style.left = (e.clientX - r.left) + "px"; rp.style.top = (e.clientY - r.top) + "px";
       box.appendChild(rp); setTimeout(function () { rp.remove(); }, 1600);
       n++; clearTimeout(timer);
-      box.style.setProperty("--lift", Math.min(n, 4) / 4);
+      if (seas[0] && seas[0].boost) seas[0].boost(Math.min(n, 4) / 4);
       if (n >= 5) { n = 0; tide(dir); return; }
-      timer = setTimeout(function () { n = 0; box.style.setProperty("--lift", 0); }, 3000);
+      timer = setTimeout(function () { n = 0; if (seas[0] && seas[0].boost) seas[0].boost(0); }, 3000);
     });
   }
   /* 물을 건너는 전환: 올라갈 땐 흰 수면이 아래에서 차오르고, 내려갈 땐 짙은 바다가 위에서 덮친다.
@@ -163,7 +163,8 @@
         stampSVG() +
         '<div class="frame above-in">' +
           '<span class="cross a"><i></i></span><span class="cross b"><i></i></span>' +
-          orbitSVG().replace("11,034 m", "0 m — 수면").replace(">∞<", ">↑<").replace("[ 신호원 ]", "[ 수신점 ]") +
+          '<div class="orbit-box">' + orbitSVG().replace(/<circle class="ping"[^>]*\/>/g, "").replace("11,034 m", "0 m — 수면").replace(">∞<", ">↑<").replace("[ 신호원 ]", "[ 수신점 ]") +
+            '<i class="pulse"></i><i class="pulse"></i><i class="pulse"></i></div>' +
           '<p class="above-en">' + esc(s.en || "Above the Surface") + "</p>" +
           "<h1>" + esc(s.title || "지상의 나") + "</h1>" +
           '<p class="above-line">' + esc(s.line || "") + "</p>" +
@@ -177,7 +178,7 @@
         "</div>" +
       "</section>" +
       "";
-    seas.push(makeSea(document.getElementById("skySea"), { v0: 0.56, cell: innerWidth < 720 ? 1.6 : 1, amp: 0.42, speed: 0.45, band: true, flip: true, light: true, scale: 0.5 }));
+    seas.push(makeSea(document.getElementById("skySea"), { v0: 0.56, cell: innerWidth < 720 ? 1.6 : 1, amp: 0.42, speed: 0.45, band: true, flip: true, light: true, scale: innerWidth < 720 ? 0.35 : 0.4 }));
     touchSea(view.querySelector(".above"), function (y, py) { return py < view.querySelector(".above").offsetHeight * 0.4; }, "down");
   }
   function renderIncoming() {
@@ -683,6 +684,7 @@
     if (io) io.observe(cv);
     start();
     return {
+      boost: function (k) { gl.uniform1f(U.uAmp, (opt.amp || 0.36) * (1 + k * 0.5)); if (!raf) draw(); },
       resize: function () { size(); draw(); },
       wake: start, sleep: stop,
       kill: function () { alive = false; stop(); if (io) io.disconnect(); }

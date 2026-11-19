@@ -604,8 +604,6 @@ html,body{overflow-x:hidden}
 /* =========================================================
    입구 — 물결을 건드림
    ========================================================= */
-.still{--lift:0}
-.still .sea{filter:brightness(calc(1 + var(--lift) * .5));transition:filter 1.2s ease}
 .still .ripple{position:absolute;z-index:2;width:0;height:0;pointer-events:none}
 .still .ripple::before,.still .ripple::after{content:"";position:absolute;left:-90px;top:-26px;width:180px;height:52px;border-radius:50%;border:1.5px solid rgba(224,232,255,1);box-shadow:0 0 14px rgba(150,175,255,.45),inset 0 0 10px rgba(150,175,255,.3);transform:scale(.1);opacity:1;animation:ripple 1.5s cubic-bezier(.2,.6,.3,1) forwards}
 .still .ripple::after{animation-delay:.2s;border-color:rgba(214,224,255,.55)}
@@ -643,7 +641,11 @@ body.is-surface .foot{display:none}
 .above .cross i{position:absolute;inset:5px;border:1px solid var(--ink);border-radius:50%}
 .above .cross.a{left:var(--gut);bottom:24px}
 .above .cross.b{right:var(--gut);bottom:24px}
-.above .orbit{position:absolute;left:50%;top:56%;width:min(900px,96vw);transform:translate(-40%,-50%);pointer-events:none;overflow:visible;z-index:-1}
+.above .orbit-box{position:absolute;left:50%;top:56%;width:min(900px,96vw);aspect-ratio:900/640;transform:translate(-40%,-50%);pointer-events:none;z-index:-1}
+.above .orbit{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.above .pulse{position:absolute;left:52.2%;top:51.6%;width:66.7%;aspect-ratio:1;margin:-33.35% 0 0 -33.35%;border:1px solid var(--blue);border-radius:50%;opacity:0;transform:scale(.15);animation:pulse 5.4s cubic-bezier(.2,.6,.3,1) infinite;will-change:transform,opacity}
+.above .pulse:nth-child(3){animation-delay:1.8s}.above .pulse:nth-child(4){animation-delay:3.6s}
+@keyframes pulse{0%{transform:scale(.15);opacity:.9}100%{transform:scale(1);opacity:0}}
 .above .orbit .ring{fill:none;stroke:var(--ink);stroke-width:.8;opacity:.55}
 .above .orbit .ring.d{stroke-dasharray:3 5;stroke:var(--blue);opacity:1}
 .above .orbit .ping{fill:none;stroke:var(--blue);stroke-width:1;transform-origin:center;transform-box:fill-box;animation:ping 5.4s cubic-bezier(.2,.6,.3,1) infinite;opacity:0}
@@ -690,7 +692,7 @@ body.is-surface .foot{display:none}
 .soon figcaption .tg{width:100%;font-family:var(--mono);font-size:.66rem;color:var(--ink-3)}
 @media (max-width:900px){
   .above .sheet,.above .vert{display:none}
-  .above .orbit{width:150vw;transform:translate(-50%,-50%)}
+  .above .orbit-box{width:150vw;transform:translate(-50%,-50%)}
 }
 @media (max-width:720px){
   .soons{grid-template-columns:1fr 1fr;gap:24px 14px}
@@ -778,8 +780,6 @@ body.is-surface .prose strong,body.is-surface .prose b{color:var(--ink)}
 .above .ripple{position:absolute;z-index:3;width:0;height:0;pointer-events:none}
 .above .ripple::before,.above .ripple::after{content:"";position:absolute;left:-90px;top:-26px;width:180px;height:52px;border-radius:50%;border:2px solid var(--blue-d);background:radial-gradient(closest-side,rgba(39,65,230,.12),transparent);box-shadow:0 0 0 1px rgba(255,255,255,.8),0 0 16px rgba(39,65,230,.45);transform:scale(.1);opacity:1;animation:ripple 1.5s cubic-bezier(.2,.6,.3,1) forwards}
 .above .ripple::after{animation-delay:.2s;border-color:var(--blue);background:none}
-.above{--lift:0}
-.above .sea{filter:saturate(calc(1 + var(--lift) * .6)) contrast(calc(1 + var(--lift) * .25));transition:filter 1.2s ease}
 /* 전환 문구: 물이 걷히기 시작하면 함께 사라진다 (애니메이션이 투명도를 붙잡고 있어서 따로 지운다) */
 .tide.out .tide-say{animation:sayOut .45s ease forwards}
 @keyframes sayOut{from{opacity:1;letter-spacing:.5em}to{opacity:0;letter-spacing:.8em}}
@@ -797,3 +797,8 @@ body.is-surf-home .above-in{min-height:0;height:100%}
 .soon-h h2{font-size:clamp(2rem,4.4vw,3.4rem);line-height:1.05}
 .soon-h h2 i{display:block;font-family:var(--en-serif);font-style:italic;font-size:.46em;color:var(--blue);margin-top:6px}
 @media (max-width:720px){body.is-surf-home .above-in{padding-bottom:9vh}}
+
+/* 움직이는 꾸밈은 합성 레이어로만 움직이게 */
+.stamp,.spk,.ticker div{will-change:transform}
+.stamp{contain:layout paint}
+.above .halftone{will-change:auto}
