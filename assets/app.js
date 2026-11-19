@@ -86,6 +86,76 @@
         "</div>" +
       "</section>";
     seas.push(makeSea(document.getElementById("heroSea"), { v0: innerWidth < 720 ? 0.7 : 0.68, cell: innerWidth < 720 ? 1.6 : 1, amp: 0.42, speed: 0.55, band: true, scale: 0.5 }));
+    touchSea(view.querySelector(".still"), innerWidth < 720 ? 0.7 : 0.68);
+  }
+
+  /* 물결을 다섯 번 건드리면 위에서 빛이 내려오고, 지상으로 올라간다.
+     멈추면 몇 초 뒤 처음부터 다시 센다. */
+  function touchSea(box, v0) {
+    if (!box) return;
+    var n = 0, timer = 0;
+    box.addEventListener("pointerdown", function (e) {
+      if (e.target.closest("a, button")) return;
+      var r = box.getBoundingClientRect(), y = (e.clientY - r.top) / r.height;
+      if (y < v0) return;
+      var rp = document.createElement("i");
+      rp.className = "ripple"; rp.style.left = (e.clientX - r.left) + "px"; rp.style.top = (e.clientY - r.top) + "px";
+      box.appendChild(rp); setTimeout(function () { rp.remove(); }, 1600);
+      n++; clearTimeout(timer);
+      box.style.setProperty("--lift", Math.min(n, 4) / 4);
+      if (n >= 5) { n = 0; rise(); return; }
+      timer = setTimeout(function () { n = 0; box.style.setProperty("--lift", 0); }, 3000);
+    });
+  }
+  function rise() {
+    var o = document.createElement("div"); o.className = "breach"; document.body.appendChild(o);
+    requestAnimationFrame(function () { o.classList.add("on"); });
+    setTimeout(function () { firstPaint = true; location.hash = "#/surface"; }, 1300);
+    setTimeout(function () { o.classList.add("off"); }, 1500);
+    setTimeout(function () { o.remove(); }, 2600);
+  }
+
+  /* ---------- 지상 ---------- */
+  var ICON_DEEP = null, ICON_SURF = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23F3F5FA'/%3E%3Ccircle cx='32' cy='32' r='22' fill='none' stroke='%232741E6' stroke-width='2'/%3E%3Cpath d='M32 14 Q34 30 50 32 Q34 34 32 50 Q30 34 14 32 Q30 30 32 14Z' fill='%232741E6'/%3E%3C/svg%3E";
+  function setSurface(on) {
+    var ic = document.querySelector('link[rel="icon"]'), tc = document.querySelector('meta[name="theme-color"]');
+    if (ICON_DEEP === null && ic) ICON_DEEP = ic.getAttribute("href");
+    if (ic) ic.setAttribute("href", on ? ICON_SURF : ICON_DEEP);
+    if (tc) tc.setAttribute("content", on ? "#F3F5FA" : "#040A18");
+    document.body.classList.toggle("is-surface", on);
+    SNOW.up = on; SNOW.rgb = on ? "39,65,230" : "226,234,255"; SNOW.k = on ? 1.5 : 1.6;
+  }
+  function renderSurface() {
+    var s = D.surface || {}, list = s.teasers || [];
+    view.innerHTML =
+      '<section class="above">' +
+        '<canvas class="sea" id="skySea" aria-hidden="true"></canvas>' +
+        '<div class="frame above-in">' +
+          '<span class="cross a"><i></i></span><span class="cross b"><i></i></span>' +
+          orbitSVG().replace("11,034 m", "0 m — 수면").replace(">∞<", ">↑<").replace("[ 신호원 ]", "[ 수신점 ]") +
+          '<p class="above-en">' + esc(s.en || "Above the Surface") + "</p>" +
+          "<h1>" + esc(s.title || "지상의 나") + "</h1>" +
+          '<p class="above-line">' + esc(s.line || "") + "</p>" +
+          '<aside class="sheet" aria-label="수신 정보"><header><span>RECEIVED</span><span>No.' + pad(list.length) + "</span></header><dl>" +
+            "<div><dt>발신</dt><dd>하달 아래</dd></div><div><dt>수신</dt><dd>지상의 " + esc((D.site || {}).maker || "테르마") + "</dd></div>" +
+            '<div><dt>상태</dt><dd>조율 중</dd></div></dl><footer><span class="barcode"></span><span class="tiny">HDL-' + pad(list.length) + "00</span></footer></aside>" +
+          '<div class="vert">아직 닿지 않은 신호를, <b>먼저 받아 둡니다</b></div>' +
+        "</div>" +
+      "</section>" +
+      '<section class="frame soon-list">' +
+        '<div class="soon-h"><span class="tiny br">incoming</span><h2>곧 올라올 것들</h2><span class="tiny">' + pad(list.length) + " signals</span></div>" +
+        '<div class="soons">' + list.map(function (t, k) {
+          return '<figure class="soon">' +
+            '<div class="meta"><span>( ' + pad(k + 1) + " )</span><span>COMING SOON</span></div>" +
+            '<div class="pic">' + (t.img ? '<img src="' + esc(t.img) + '" alt="">' : '<div class="ghost"><span>NO IMAGE</span></div>') +
+              '<span class="star4" aria-hidden="true"></span></div>' +
+            "<figcaption><b>" + esc(t.name || "???") + "</b>" + (t.en ? "<i>" + esc(t.en) + "</i>" : "") +
+              '<span class="tg">' + (t.tags || []).map(function (g) { return "#" + esc(g); }).join(" ") + "</span></figcaption>" +
+          "</figure>";
+        }).join("") + "</div>" +
+        '<div class="dive"><a href="#/">하달로 내려가기</a></div>' +
+      "</section>";
+    seas.push(makeSea(document.getElementById("skySea"), { v0: 0.56, cell: innerWidth < 720 ? 1.6 : 1, amp: 0.42, speed: 0.45, band: true, flip: true, light: true, scale: 0.5 }));
   }
 
   /* ---------- 건져 올린 것들 ---------- */
@@ -472,7 +542,7 @@
      (어차피 흐릿하게 보이므로 해상도를 낮춰도 티가 나지 않는다) */
   var FRAG = [
     "precision mediump float;",
-    "uniform vec2 uRes; uniform float uT, uV0, uCell, uAmp, uTop, uAsp;",
+    "uniform vec2 uRes; uniform float uT, uV0, uCell, uAmp, uTop, uAsp, uFlip, uLight;",
     "vec2 h2(vec2 p){ vec3 q=fract(vec3(p.xyx)*vec3(.1031,.1030,.0973)); q+=dot(q,q.yzx+33.33); return fract((q.xx+q.yz)*q.zy); }",
     "float sm(float a,float b,float x){ x=clamp((x-a)/(b-a),0.,1.); return x*x*(3.-2.*x); }",
     "float edge(vec2 g, float t){",
@@ -491,7 +561,8 @@
     "}",
     "void main(){",
     "  vec2 fc=gl_FragCoord.xy; float u=fc.x/uRes.x;",
-    "  float v=uTop+(1.-fc.y/uRes.y)*(1.-uTop);",
+    "  float yy=fc.y/uRes.y; if(uFlip>.5) yy=1.-yy;",
+    "  float v=uTop+(1.-yy)*(1.-uTop);",
     "  if(v<uV0){ gl_FragColor=vec4(0.); return; }",
     "  float K=9.5/uCell, inv=1./(.46+.66*v);",
     "  vec2 p=vec2((u-.5)*K*inv, uAsp*K*(.14+1.34*pow(v,2.2)));",
@@ -502,6 +573,7 @@
     "  float l1=exp(-e1/w), l2=exp(-e2/(w*1.15));",
     "  float L=.5*l1+.4*l2+.8*l1*l2+.14*(exp(-e1*5.)+exp(-e2*5.));",
     "  float env=sm(uV0,min(.99,uV0+.2),v)*uAmp*sm(0.,.14,u)*sm(0.,.14,1.-u);",
+    "  if(uLight>.5){ float a=clamp(L*env*.8,0.,.55); gl_FragColor=vec4(vec3(.153,.255,.902)*a,a); return; }",
     "  vec3 col=vec3(.62,.86,1.)*L*env; col=col/(1.+col*.6);",
     "  gl_FragColor=vec4(col,clamp(max(col.b,col.g),0.,1.));",
     "}"
@@ -521,16 +593,18 @@
     var buf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buf);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
     var loc = gl.getAttribLocation(pr, "p"); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
-    var U = {}; ["uRes", "uT", "uV0", "uCell", "uAmp", "uTop", "uAsp"].forEach(function (k) { U[k] = gl.getUniformLocation(pr, k); });
+    var U = {}; ["uRes", "uT", "uV0", "uCell", "uAmp", "uTop", "uAsp", "uFlip", "uLight"].forEach(function (k) { U[k] = gl.getUniformLocation(pr, k); });
     gl.uniform1f(U.uV0, opt.v0 || 0);
     gl.uniform1f(U.uCell, opt.cell || 1);
     gl.uniform1f(U.uAmp, opt.amp || 0.36);
+    gl.uniform1f(U.uFlip, opt.flip ? 1 : 0);
+    gl.uniform1f(U.uLight, opt.light ? 1 : 0);
 
     var raf = 0, last = 0, t = Math.random() * 40, alive = true, visible = true;
     function size() {
       /* 캔버스는 물결이 시작하는 높이 조금 위부터 바닥까지만 차지한다 */
       var top = Math.max(0, (opt.v0 || 0) - 0.02), vh = innerHeight, vw = innerWidth;
-      if (opt.band) { cv.style.top = (top * 100) + "%"; cv.style.height = ((1 - top) * 100) + "%"; }
+      if (opt.band) { cv.style[opt.flip ? "bottom" : "top"] = (top * 100) + "%"; cv.style.height = ((1 - top) * 100) + "%"; }
       var r = cv.getBoundingClientRect(), q = opt.scale || 0.5;
       cv.width = Math.max(1, Math.round(r.width * q)); cv.height = Math.max(1, Math.round(r.height * q));
       gl.viewport(0, 0, cv.width, cv.height);
@@ -561,6 +635,7 @@
   }
 
   /* 종이 위에도 바다 눈이 아주 조금 흩날린다 */
+  var SNOW = { up: false, rgb: "226,234,255", k: 1.6 };
   (function drift() {
     var cv = document.getElementById("drift"), ctx = cv.getContext("2d"), W, H, ds = [], raf = 0, last = 0;
     function size() {
@@ -573,9 +648,10 @@
     function draw(dt) {
       ctx.clearRect(0, 0, W, H);
       for (var i = 0; i < ds.length; i++) {
-        var d = ds[i]; d.y += d.v * dt; d.ph += 0.35 * dt; if (d.y > H + 4) { d.y = -4; d.x = Math.random() * W; }
+        var d = ds[i]; d.y += (SNOW.up ? -d.v * 1.3 : d.v) * dt; d.ph += 0.35 * dt;
+        if (d.y > H + 4) { d.y = -4; d.x = Math.random() * W; } else if (d.y < -4) { d.y = H + 4; d.x = Math.random() * W; }
         ctx.beginPath(); ctx.arc(d.x + Math.sin(d.ph) * d.sw, d.y, d.r, 0, 6.283);
-        ctx.fillStyle = "rgba(226,234,255," + (d.a * 1.6).toFixed(3) + ")"; ctx.fill();
+        ctx.fillStyle = "rgba(" + SNOW.rgb + "," + Math.min(1, d.a * SNOW.k).toFixed(3) + ")"; ctx.fill();
       }
     }
     function frame(tm) { raf = requestAnimationFrame(frame); if (last && tm - last < 32) return; var dt = last ? Math.min((tm - last) / 1000, .1) : 0; last = tm; draw(dt); }
@@ -610,6 +686,7 @@
     document.body.classList.toggle("is-home", top === "home");
     document.body.classList.toggle("is-char", top === "works" && !!parts[2]);
     document.body.classList.toggle("is-obs", top === "maker");
+    setSurface(top === "surface");
     paintNav(top);
     if (top === "home") renderHome();
     else if (top === "works" && !parts[1]) renderWorks();
@@ -617,8 +694,9 @@
     else if (top === "log") renderLog();
     else if (top === "lore") renderLore(parts[1]);
     else if (top === "maker") renderMaker();
+    else if (top === "surface") renderSurface();
     else notYet("알 수 없는 채널");
-    document.title = (top === "home" ? "" : ((byId(CH, top) || {}).name || "") + " · ") + "하달의 너머";
+    document.title = top === "surface" ? "지상 · 하달의 너머" : (top === "home" ? "" : ((byId(CH, top) || {}).name || "") + " · ") + "하달의 너머";
     scrollTo(0, 0);
     view.classList.remove("out", "out-left", "out-right");
     view.classList.add("in");
@@ -648,7 +726,7 @@
   ["contextmenu", "dragstart"].forEach(function (ev) {
     document.addEventListener(ev, function (e) {
       var t = e.target;
-      if (t && t.closest && (t.tagName === "IMG" || t.closest(".screen, .feed, .pic, .art, .gal, .lb, .roster"))) e.preventDefault();
+      if (t && t.closest && (t.tagName === "IMG" || t.closest(".screen, .feed, .pic, .art, .gal, .lb, .roster, .soon"))) e.preventDefault();
     });
   });
 
