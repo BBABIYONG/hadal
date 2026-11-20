@@ -264,28 +264,22 @@
     "line": "하달의 위.",
     "teasers": [
       {
-        "name": "이름 01",
-        "en": "NAME",
+        "name": "세페르",
+        "en": "",
         "tags": [
-          "장르"
+          "판타지",
+          "로맨스"
         ],
-        "img": ""
+        "img": "images/soon-sepher.webp"
       },
       {
-        "name": "이름 02",
-        "en": "NAME",
+        "name": "에쉬",
+        "en": "",
         "tags": [
-          "장르"
+          "판타지",
+          "로맨스"
         ],
-        "img": ""
-      },
-      {
-        "name": "이름 03",
-        "en": "NAME",
-        "tags": [
-          "장르"
-        ],
-        "img": ""
+        "img": "images/soon-esh.webp"
       }
     ],
     "station": {
