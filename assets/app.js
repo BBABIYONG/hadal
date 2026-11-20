@@ -130,7 +130,7 @@
     var bub = "";
     for (var i = 0; i < 26; i++) bub += '<i style="left:' + (Math.random() * 100).toFixed(1) + "%;animation-delay:" + (Math.random() * .9).toFixed(2) + "s;--s:" + (0.5 + Math.random() * 1.6).toFixed(2) + '"></i>';
     o.innerHTML = '<div class="tide-body"><svg class="tide-edge" viewBox="0 0 1200 60" preserveAspectRatio="none" aria-hidden="true"><path d="M0 30 Q75 0 150 30 T300 30 T450 30 T600 30 T750 30 T900 30 T1050 30 T1200 30 V60 H0Z"/><path class="b" d="M0 34 Q100 10 200 34 T400 34 T600 34 T800 34 T1000 34 T1200 34 V60 H0Z"/></svg><div class="tide-fill"></div></div><div class="tide-bub">' + bub + "</div>" +
-      '<p class="tide-say">' + (up ? "수면 위로" : "하달 아래로") + "</p>";
+      '<p class="tide-say">' + (up ? "수면 위로" : "하달 너머로") + "</p>";
     document.body.appendChild(o);
     requestAnimationFrame(function () { requestAnimationFrame(function () { o.classList.add("in"); }); });
     setTimeout(function () { firstPaint = true; location.hash = up ? "#/surface" : "#/"; }, 1250);
