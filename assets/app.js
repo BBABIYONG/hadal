@@ -762,6 +762,7 @@
     else if (upIn) renderIncoming();
     else if (top === "surface") renderSurface();
     else notYet("알 수 없는 채널");
+    document.body.classList.remove("booting");
     document.title = top === "surface" ? (upSt ? "송신소 · 지상" : upIn ? "수신함 · 지상" : "지상") : (top === "home" ? "" : ((byId(CH, top) || {}).name || "") + " · ") + "하달의 너머";
     scrollTo(0, 0);
     view.classList.remove("out", "out-left", "out-right");
@@ -788,6 +789,15 @@
     all.forEach(function (s) { if (s) document.hidden ? s.sleep() : s.wake(); });
   });
   addEventListener("hashchange", go);
+
+  /* 데이터가 오기 전에도 첫 화면 모양(입구·지상)을 먼저 맞춰 둔다.
+     안 그러면 머리 줄과 바닥이 잠깐 보였다가 사라진다. */
+  (function preRoute() {
+    var parts = (location.hash || "#/").replace(/^#\/?/, "").split("/"), top = parts[0] || "home";
+    document.body.classList.toggle("is-home", top === "home");
+    document.body.classList.toggle("is-surface", top === "surface");
+    document.body.classList.toggle("is-surf-home", top === "surface" && !parts[1]);
+  })();
   /* 그림 위에서는 우클릭 메뉴와 끌기를 막는다 */
   ["contextmenu", "dragstart"].forEach(function (ev) {
     document.addEventListener(ev, function (e) {

@@ -824,3 +824,8 @@ body.is-surface .now b .caret{background:var(--blue)}
   a,button,[role="button"],summary,label[for]{cursor:var(--cp)}
   input,textarea{cursor:text}
 }
+
+/* 첫 로딩: 경로가 정해지기 전에는 머리 줄·바닥·메뉴를 숨겨 깜빡임을 막는다 */
+body.booting .top{border-bottom-color:transparent}
+body.booting .top::after,body.booting .foot{display:none}
+body.booting .nav{visibility:hidden}
