@@ -246,7 +246,7 @@
         (src ? '<img src="' + esc(src) + '" alt="" loading="lazy">' +
                '<img class="tint" src="' + esc(src) + '" alt="" loading="lazy" aria-hidden="true">' +
                '<i class="crn" aria-hidden="true"></i><span class="tune" aria-hidden="true">TUNE IN →</span>'
-             : '<div class="nosig"><span>NO SIGNAL</span><span>' + dot(w.date) + "</span></div>") +
+             : '<div class="nosig"><span>' + esc(c.wait || w.wait || "NO SIGNAL") + '</span><span>' + dot(w.date) + "</span></div>") +
         (w.badge ? '<span class="flag">' + esc(w.badge) + "</span>" : w.adult ? '<span class="flag">19</span>' : "") +
         (w.example ? '<span class="flag ex">예시</span>' : "") +
       "</div>" +
@@ -386,7 +386,7 @@
         '<div class="frame char-in">' +
           '<div class="art">' +
             '<svg class="rings" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="48"/><circle class="d" cx="50" cy="50" r="36"/><circle cx="50" cy="50" r="22"/></svg>' +
-            (c.img ? '<img src="' + esc(c.img) + '" alt="' + esc(c.name) + '">' : '<div class="noportrait"><span>PORTRAIT</span><span>NO SIGNAL</span></div>') +
+            (c.img ? '<img src="' + esc(c.img) + '" alt="' + esc(c.name) + '">' : '<div class="noportrait"><span>PORTRAIT</span><span>' + esc(c.wait || w.wait || "NO SIGNAL") + "</span></div>") +
           "</div>" +
           '<div class="card-info">' +
             '<div class="from"><i><span></span></i><span>' + esc(c._solo ? (w.platform || "크랙") : w.title) + "</span><span>" + esc(w.code || "") + "</span></div>" +
