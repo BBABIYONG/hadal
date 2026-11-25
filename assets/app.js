@@ -377,7 +377,7 @@
     }).join("")]);
     tabs.push(["gallery", "GALLERY " + pad(gal.length), '<div class="gal" id="gal">' + slots.map(function (g, k) {
       return g ? '<button type="button" data-i="' + k + '"><img src="' + esc(g.src) + '" alt="' + esc(g.cap || "") + '" loading="lazy">' + (g.secret ? '<span class="secret">미공개</span>' : "") + "</button>"
-               : '<button type="button" class="blank" tabindex="-1" aria-hidden="true"></button>';
+               : '<button type="button" class="blank" tabindex="-1" aria-hidden="true" data-w="' + esc(c.wait || w.wait || "EMPTY") + '"></button>';
     }).join("") + "</div>"]);
 
     view.innerHTML =
